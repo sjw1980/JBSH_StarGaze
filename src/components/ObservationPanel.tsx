@@ -160,9 +160,11 @@ export default function ObservationPanel() {
               <div className="text-center py-5 text-slate-500">
                 <div className="text-2xl mb-2">🔑</div>
                 <div className="text-sm leading-relaxed">
-                  OpenWeatherMap API 키를
+                  공공데이터포털 API 키를
                   <br />
-                  <code className="text-xs text-slate-400">.env.local</code>에 설정하세요
+                  <code className="text-xs text-slate-400">.env</code>에 설정하세요
+                  <br />
+                  <code className="text-xs text-slate-400">OPEN_API_KEY=인증키</code>
                 </div>
               </div>
             )}

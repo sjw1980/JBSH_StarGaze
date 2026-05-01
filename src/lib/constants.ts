@@ -45,15 +45,6 @@ export const RESOURCES = [
     icon: '☀️',
   },
   {
-    id: 'jbsh',
-    name: '전북교육청',
-    nameEn: 'Jeonbuk Education',
-    url: 'https://www.jbedu.kr',
-    description: '전북특별자치도교육청',
-    color: '#10b981',
-    icon: '🏫',
-  },
-  {
     id: 'jbshs',
     name: '전북과학고등학교',
     nameEn: 'JBSHS',

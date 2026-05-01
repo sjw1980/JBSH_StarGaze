@@ -33,7 +33,16 @@ export default function Home() {
 
       if (wRes.ok) {
         const w = await wRes.json()
-        if (!w.error) setWeatherData(w)
+        if (!w.error) {
+          setWeatherData(w)
+          // KMA getLunPhInfo 기반 달 위상 우선 사용, 없으면 astronomy-engine 로컬 계산
+          if (typeof w.moonPhase === 'number') {
+            setMoonPhase(w.moonPhase)
+          } else {
+            const phase = await getMoonPhase()
+            setMoonPhase(phase)
+          }
+        }
       }
 
       if (fRes.ok) {
@@ -41,8 +50,6 @@ export default function Home() {
         if (!f.error) setForecastData(f)
       }
 
-      const phase = await getMoonPhase()
-      setMoonPhase(phase)
       setWeatherError(null)
     } catch (e) {
       setWeatherError(String(e))

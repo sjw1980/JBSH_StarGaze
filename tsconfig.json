@@ -18,5 +18,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/css.d.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/open_api"]
 }

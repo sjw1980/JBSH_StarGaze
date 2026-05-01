@@ -12,6 +12,7 @@ export interface WeatherData {
   sunset: number
   rain?: { '1h': number }
   snow?: { '1h': number }
+  moonPhase?: number
 }
 
 export interface ForecastItem {
