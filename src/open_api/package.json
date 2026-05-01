@@ -9,7 +9,8 @@
     "lunph": "npx ts-node getLunPhInfo.ts",
     "julday": "npx ts-node getJulDayInfo.ts",
     "solcal": "npx ts-node getSolCalInfo.ts",
-    "astro": "npx ts-node getAstroEventInfo.ts"
+    "astro": "npx ts-node getAstroEventInfo.ts",
+    "weather": "npx ts-node getVilageFcst.ts"
   },
   "dependencies": {
     "xml2js": "^0.6.2"

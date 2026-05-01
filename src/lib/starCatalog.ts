@@ -355,134 +355,254 @@ export interface ConstellationDef {
 }
 
 export const CONSTELLATIONS: ConstellationDef[] = [
+  // ── 오리온 ─────────────────────────────────────────────────────────────
+  // 어깨는 같은 쪽 벨트별과 연결 (교차 없음)
+  // Bellatrix(서,81.3°)→Mintaka(서,83.0°), Betelgeuse(동,88.8°)→Alnitak(동,85.2°)
   {
     name: 'Orion',
     nameKo: '오리온',
     lines: [
-      [28716, 27989], // Meissa - Betelgeuse
-      [28716, 25336], // Meissa - Bellatrix
-      [27989, 25930], // Betelgeuse - Mintaka
-      [25336, 26311], // Bellatrix - Alnilam
-      [25930, 26311], // Mintaka - Alnilam (belt)
-      [26311, 26727], // Alnilam - Alnitak (belt)
-      [24436, 25930], // Rigel - Mintaka
-      [26727, 27366], // Alnitak - Saiph
+      [28716, 27989], // Meissa - Betelgeuse (머리-왼쪽어깨)
+      [28716, 25336], // Meissa - Bellatrix  (머리-오른쪽어깨)
+      [27989, 26727], // Betelgeuse - Alnitak  (동쪽 어깨→동쪽 벨트)
+      [25336, 25930], // Bellatrix  - Mintaka   (서쪽 어깨→서쪽 벨트)
+      [25930, 26311], // Mintaka - Alnilam  (벨트)
+      [26311, 26727], // Alnilam - Alnitak  (벨트)
+      [24436, 25930], // Rigel   - Mintaka   (오른발→서쪽 벨트)
+      [26727, 27366], // Alnitak - Saiph    (동쪽 벨트→왼발)
     ],
   },
+  // ── 큰곰 (북두칠성) ────────────────────────────────────────────────────
   {
     name: 'Ursa Major',
     nameKo: '큰곰',
     lines: [
-      [54061, 53910],  // Dubhe - Merak
+      [54061, 53910],  // Dubhe - Merak   (그릇)
       [53910, 58001],  // Merak - Phecda
       [58001, 59774],  // Phecda - Megrez
-      [59774, 62956],  // Megrez - Alioth
+      [59774, 54061],  // Megrez - Dubhe  (그릇 닫기)
+      [59774, 62956],  // Megrez - Alioth (손잡이)
       [62956, 65378],  // Alioth - Mizar
       [65378, 67301],  // Mizar - Alkaid
-      [59774, 54061],  // Megrez - Dubhe
     ],
   },
+  // ── 작은곰 (작은 국자) ──────────────────────────────────────────────────
+  // 핸들: Polaris(α) → Yildun(δ) → ε  /  그릇: ε→ζ→η→Kochab(β)→Pherkad(γ)→Yildun
   {
     name: 'Ursa Minor',
     nameKo: '작은곰',
     lines: [
-      [11767, 85822],  // Polaris - Yildun
-      [85822, 77055],  // Yildun - ζ UMi (approx chain)
-      [77055, 72607],  // ζ - η UMi
-      [72607, 75097],  // η - Kochab
-      [75097, 79822],  // Kochab - Pherkad
-      [79822, 82080],  // Pherkad - Yildun (bowl)
-      [82080, 11767],  // Yildun - Polaris
+      [11767, 82080],  // Polaris(α) - Yildun(δ)  핸들 시작
+      [82080, 85822],  // Yildun(δ)  - ε UMi
+      [85822, 77055],  // ε UMi      - ζ UMi       그릇 입구
+      [77055, 72607],  // ζ UMi      - η UMi
+      [72607, 75097],  // η UMi      - Kochab(β)
+      [75097, 79822],  // Kochab(β)  - Pherkad(γ)
+      [79822, 82080],  // Pherkad(γ) - Yildun(δ)  그릇 닫기
     ],
   },
+  // ── 카시오페이아 (W자) ──────────────────────────────────────────────────
   {
     name: 'Cassiopeia',
     nameKo: '카시오페이아',
     lines: [
-      [4427,  3179],   // Caph - Schedar
-      [3179,  6686],   // Schedar - Tsih
-      [6686,  8886],   // Tsih - Ruchbah
-      [8886,  11569],  // Ruchbah - Segin
+      [4427,  3179],  // Caph    - Schedar
+      [3179,  6686],  // Schedar - Tsih
+      [6686,  8886],  // Tsih    - Ruchbah
+      [8886,  11569], // Ruchbah - Segin
     ],
   },
+  // ── 세페우스 ────────────────────────────────────────────────────────────
+  {
+    name: 'Cepheus',
+    nameKo: '세페우스',
+    lines: [
+      [109857, 112724], // Alderamin - Alfirk
+      [112724, 116727], // Alfirk    - Errai
+    ],
+  },
+  // ── 용 ──────────────────────────────────────────────────────────────────
+  {
+    name: 'Draco',
+    nameKo: '용',
+    lines: [
+      [61281, 75458],  // Thuban   - Rastaban
+      [75458, 87585],  // Rastaban - Eltanin (머리)
+    ],
+  },
+  // ── 사자 (낫 + 몸통) ────────────────────────────────────────────────────
+  // 낫: Epsilon Leo → Regulus → Algieba → Zeta Leo → Epsilon Leo (닫기)
+  // 몸통: Algieba → Zosma → Denebola
   {
     name: 'Leo',
     nameKo: '사자',
     lines: [
-      [49669, 50583],  // Regulus - Algieba
-      [50583, 51624],  // Algieba - Zeta Leo
-      [51624, 47908],  // Zeta - Zosma
-      [47908, 54872],  // Zosma - Denebola
-      [49669, 46750],  // Regulus - Epsilon Leo (sickle bottom)
+      [46750, 49669],  // Epsilon Leo - Regulus    (낫 아랫날)
+      [49669, 50583],  // Regulus     - Algieba
+      [50583, 51624],  // Algieba     - Zeta Leo
+      [51624, 46750],  // Zeta Leo    - Epsilon Leo (낫 윗날, 닫기)
+      [50583, 47908],  // Algieba     - Zosma       (몸통)
+      [47908, 54872],  // Zosma       - Denebola    (엉덩이/꼬리)
     ],
   },
+  // ── 처녀 ────────────────────────────────────────────────────────────────
+  {
+    name: 'Virgo',
+    nameKo: '처녀',
+    lines: [
+      [65474, 57380],  // Spica        - Porrima
+      [57380, 71957],  // Porrima      - Vindemiatrix
+    ],
+  },
+  // ── 천칭 ────────────────────────────────────────────────────────────────
+  {
+    name: 'Libra',
+    nameKo: '천칭',
+    lines: [
+      [72622, 74785],  // Zubenelgenubi - Zubeneschamali
+    ],
+  },
+  // ── 전갈 ────────────────────────────────────────────────────────────────
   {
     name: 'Scorpius',
     nameKo: '전갈',
     lines: [
+      [77634, 78527],  // Acrab    - Dschubba (머리 집게)
       [78527, 80763],  // Dschubba - Antares
-      [80763, 82396],  // Antares - Sargas
-      [82396, 81266],  // Sargas - Shaula
-      [81266, 84143],  // Shaula - Lesath
-      [78527, 77634],  // Dschubba - Acrab
+      [77634, 80763],  // Acrab    - Antares (머리 삼각형)
+      [80763, 82396],  // Antares  - Sargas
+      [82396, 81266],  // Sargas   - Shaula
+      [81266, 84143],  // Shaula   - Lesath  (독침)
     ],
   },
+  // ── 뱀주인 ──────────────────────────────────────────────────────────────
   {
-    name: 'Cygnus',
-    nameKo: '백조',
+    name: 'Ophiuchus',
+    nameKo: '뱀주인',
     lines: [
-      [102098, 95947],  // Deneb - Sadr
-      [95947,  98110],  // Sadr - Gienah
-      [95947,  94779],  // Sadr - ε Cyg (north arm)
-      [95947, 100453],  // Sadr - δ Cyg (south arm)
+      [86032, 84012],  // Rasalhague - Sabik
+      [86032, 77070],  // Rasalhague - Unukalhai (뱀 머리쪽)
     ],
   },
+  // ── 궁수 (찻주전자) ──────────────────────────────────────────────────────
+  // 주전자 몸통: Kaus Bor → Ascella → Kaus Aus → Kaus Med → Kaus Bor (닫기)
   {
-    name: 'Lyra',
-    nameKo: '거문고',
+    name: 'Sagittarius',
+    nameKo: '궁수',
     lines: [
-      [91262, 93194],  // Vega - Sheliak
-      [91262, 93903],  // Vega - Sulafat
-      [93194, 93903],  // Sheliak - Sulafat (parallelogram base)
+      [88635, 89642],  // Kaus Borealis - Ascella   (뚜껑)
+      [89642, 90496],  // Ascella       - Kaus Aus  (몸 오른쪽)
+      [90496, 89931],  // Kaus Aus      - Kaus Med  (주둥이)
+      [89931, 88635],  // Kaus Med      - Kaus Bor  (몸 왼쪽, 닫기)
+      [89642, 92855],  // Ascella       - Nunki     (손잡이)
     ],
   },
+  // ── 염소 ────────────────────────────────────────────────────────────────
   {
-    name: 'Aquila',
-    nameKo: '독수리',
+    name: 'Capricornus',
+    nameKo: '염소',
     lines: [
-      [97649, 99473],  // Altair - Alshain
-      [97649, 97278],  // Altair - Tarazed
+      [100064, 100027], // Dabih - Deneb Algedi
     ],
   },
+  // ── 물병 ────────────────────────────────────────────────────────────────
   {
-    name: 'Gemini',
-    nameKo: '쌍둥이',
+    name: 'Aquarius',
+    nameKo: '물병',
     lines: [
-      [37826, 35550],  // Pollux - Mekbuda
-      [36850, 34693],  // Castor - Wasat
-      [35550, 34693],  // Mekbuda - Wasat
-      [35550, 32246],  // Mekbuda - Alhena
-      [34693, 30343],  // Wasat - Tejat
+      [106278, 109074], // Sadalmelik - Sadalsuud
     ],
   },
+  // ── 물고기 ──────────────────────────────────────────────────────────────
+  {
+    name: 'Pisces',
+    nameKo: '물고기',
+    lines: [
+      [116771, 4906],  // Eta Psc - Alrescha (RA 0° 경계 넘어가지만 3D에서 정상)
+    ],
+  },
+  // ── 양 ──────────────────────────────────────────────────────────────────
+  {
+    name: 'Aries',
+    nameKo: '양',
+    lines: [
+      [8903,  9884],  // Sheratan - Hamal
+      [9884, 13954],  // Hamal    - Mesarthim
+    ],
+  },
+  // ── 황소 ────────────────────────────────────────────────────────────────
   {
     name: 'Taurus',
     nameKo: '황소',
     lines: [
-      [21421, 20889],  // Aldebaran - Alcyone (Pleiades)
+      [21421, 20889],  // Aldebaran - Alcyone (플레이아데스 방향)
       [21421, 23015],  // Aldebaran - Ain
-      [21421, 17702],  // Aldebaran - Alnath
+      [21421, 17702],  // Aldebaran - Alnath  (뿔)
     ],
   },
+  // ── 쌍둥이 ──────────────────────────────────────────────────────────────
+  // Pollux-Castor 머리 연결 후 각자 아래로 내려가는 두 몸통
+  {
+    name: 'Gemini',
+    nameKo: '쌍둥이',
+    lines: [
+      [37826, 36850],  // Pollux   - Castor   (머리 연결)
+      [37826, 35550],  // Pollux   - Mekbuda  (Pollux 몸통)
+      [36850, 34693],  // Castor   - Wasat    (Castor 몸통)
+      [35550, 34693],  // Mekbuda  - Wasat    (허리 연결)
+      [35550, 32246],  // Mekbuda  - Alhena   (Pollux 발)
+      [34693, 30343],  // Wasat    - Tejat    (Castor 발)
+    ],
+  },
+  // ── 게 ──────────────────────────────────────────────────────────────────
+  {
+    name: 'Cancer',
+    nameKo: '게',
+    lines: [
+      [40526, 42806],  // Tarf - Acubens
+    ],
+  },
+  // ── 백조 (북십자) ────────────────────────────────────────────────────────
+  {
+    name: 'Cygnus',
+    nameKo: '백조',
+    lines: [
+      [102098, 95947],  // Deneb    - Sadr    (세로 빔 북쪽)
+      [95947,  98110],  // Sadr     - Gienah  (세로 빔 남쪽)
+      [94779,  95947],  // ε Cyg   - Sadr    (가로 빔 서쪽)
+      [95947, 100453],  // Sadr    - δ Cyg   (가로 빔 동쪽)
+    ],
+  },
+  // ── 거문고 ──────────────────────────────────────────────────────────────
+  {
+    name: 'Lyra',
+    nameKo: '거문고',
+    lines: [
+      [91262, 93194],  // Vega    - Sheliak
+      [91262, 93903],  // Vega    - Sulafat
+      [93194, 93903],  // Sheliak - Sulafat
+    ],
+  },
+  // ── 독수리 ──────────────────────────────────────────────────────────────
+  {
+    name: 'Aquila',
+    nameKo: '독수리',
+    lines: [
+      [97278, 97649],  // Tarazed - Altair
+      [97649, 99473],  // Altair  - Alshain
+    ],
+  },
+  // ── 마차부 ──────────────────────────────────────────────────────────────
   {
     name: 'Auriga',
     nameKo: '마차부',
     lines: [
-      [24608, 23767],  // Capella - Menkalinan
-      [24608, 23416],  // Capella - Hassaleh
-      [23767, 17702],  // Menkalinan - Alnath (shared with Taurus)
+      [24608, 23767],  // Capella    - Menkalinan
+      [24608, 23416],  // Capella    - Hassaleh
+      [23767, 17702],  // Menkalinan - Alnath
     ],
   },
+  // ── 페르세우스 ───────────────────────────────────────────────────────────
   {
     name: 'Perseus',
     nameKo: '페르세우스',
@@ -491,32 +611,28 @@ export const CONSTELLATIONS: ConstellationDef[] = [
       [15863, 18246],  // Mirfak - ζ Per
     ],
   },
+  // ── 안드로메다 (α→β→γ 올바른 방향) ─────────────────────────────────────
+  // HIP 5447: RA=17.4°(β위치), HIP 9640: RA=31.0°(γ위치)
   {
     name: 'Andromeda',
     nameKo: '안드로메다',
     lines: [
-      [677,   9640],   // Alpheratz - Mirach
-      [9640,  5447],   // Mirach - Almach
+      [677,  5447],  // Alpheratz(α) - β위치(HIP5447)
+      [5447, 9640],  // β위치        - γ위치(HIP9640)
     ],
   },
+  // ── 페가수스 (대사각형) ──────────────────────────────────────────────────
   {
     name: 'Pegasus',
     nameKo: '페가수스',
     lines: [
-      [677,   112440], // Alpheratz - Markab (Great Square)
-      [112440, 109427],// Markab - Scheat
-      [109427, 677],   // Scheat - Alpheratz
-      [113963, 109427],// Enif - Scheat
+      [677,    112440], // Alpheratz - Markab (RA 0° 경계 정상)
+      [112440, 109427], // Markab    - Scheat
+      [109427, 677],    // Scheat    - Alpheratz
+      [113963, 109427], // Enif      - Scheat
     ],
   },
-  {
-    name: 'Virgo',
-    nameKo: '처녀',
-    lines: [
-      [65474, 57380],  // Spica - Porrima
-      [57380, 71957],  // Porrima - Vindemiatrix
-    ],
-  },
+  // ── 목동 ────────────────────────────────────────────────────────────────
   {
     name: 'Bootes',
     nameKo: '목동',
@@ -525,6 +641,17 @@ export const CONSTELLATIONS: ConstellationDef[] = [
       [69673, 72105],  // Arcturus - Muphrid
     ],
   },
+  // ── 헤르쿨레스 ───────────────────────────────────────────────────────────
+  {
+    name: 'Hercules',
+    nameKo: '헤르쿨레스',
+    lines: [
+      [84345, 81693],  // Kornephoros - Sarin
+      [81693, 80816],  // Sarin       - Marsic
+      [80816, 84345],  // Marsic      - Kornephoros
+    ],
+  },
+  // ── 큰개 ────────────────────────────────────────────────────────────────
   {
     name: 'Canis Major',
     nameKo: '큰개',
@@ -534,36 +661,10 @@ export const CONSTELLATIONS: ConstellationDef[] = [
       [32349, 30324],  // Sirius - Aludra
     ],
   },
-  {
-    name: 'Hercules',
-    nameKo: '헤르쿨레스',
-    lines: [
-      [84345, 81693],  // Kornephoros - Sarin
-      [81693, 80816],  // Sarin - Marsic
-      [84345, 80816],  // Kornephoros - Marsic
-    ],
-  },
-  {
-    name: 'Ophiuchus',
-    nameKo: '뱀주인',
-    lines: [
-      [86032, 84012],  // Rasalhague - Sabik
-      [86032, 77070],  // Rasalhague - Unukalhai
-    ],
-  },
-  {
-    name: 'Sagittarius',
-    nameKo: '궁수',
-    lines: [
-      [90496, 89931],  // Kaus Aus - Kaus Media
-      [89931, 88635],  // Kaus Media - Kaus Borealis
-      [90496, 89642],  // Kaus Aus - Ascella
-      [89642, 92855],  // Ascella - Nunki
-    ],
-  },
+  // ── 북쪽왕관 ────────────────────────────────────────────────────────────
   {
     name: 'Corona Borealis',
     nameKo: '북쪽왕관',
-    lines: [],  // Alphecca 외 밝은 CrB 별이 카탈로그에 없어 선 없음
+    lines: [],  // Alphecca만 카탈로그에 있어 선 없음
   },
 ]

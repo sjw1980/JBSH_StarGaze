@@ -181,3 +181,70 @@ export interface AstroEventParams {
   solMonth: string;      // 양력 월 (MM), 필수
   ServiceKey: string;    // 인증키, 필수
 }
+
+// ────────────────────────────────────────────────
+// 단기예보 (VilageFcstInfoService_2.0 / getVilageFcst)
+// ────────────────────────────────────────────────
+
+/** API 원시 응답 아이템 (카테고리별 1행) */
+export interface VilageFcstRawItem {
+  baseDate: string;    // 발표일자 (YYYYMMDD)
+  baseTime: string;    // 발표시각 (HHMM)
+  category: string;   // 자료구분 코드 (TMP/SKY/PTY/POP/REH/WSD 등)
+  fcstDate: string;   // 예보일자 (YYYYMMDD)
+  fcstTime: string;   // 예보시각 (HHMM)
+  fcstValue: string;  // 예보값
+  nx: number;         // 예보지점 X 좌표
+  ny: number;         // 예보지점 Y 좌표
+}
+
+/** 시간대별로 피벗된 예보 (모든 카테고리를 한 행으로) */
+export interface VilageFcstHourly {
+  fcstDate: string;   // 예보일자 (YYYYMMDD)
+  fcstTime: string;   // 예보시각 (HHMM)
+  TMP:  string;       // 기온 (℃)
+  SKY:  string;       // 하늘상태 코드: 1=맑음 3=구름많음 4=흐림
+  PTY:  string;       // 강수형태 코드: 0=없음 1=비 2=비/눈 3=눈 4=소나기
+  POP:  string;       // 강수확률 (%)
+  REH:  string;       // 습도 (%)
+  WSD:  string;       // 풍속 (m/s)
+  VEC:  string;       // 풍향 (deg)
+  PCP:  string;       // 1시간 강수량 (mm 또는 '강수없음')
+  SNO:  string;       // 1시간 신적설 (cm 또는 '적설없음')
+}
+
+/** 일별 요약 */
+export interface VilageFcstDaily {
+  fcstDate: string;   // 예보일자 (YYYYMMDD)
+  TMN:  string;       // 일 최저기온 (℃)
+  TMX:  string;       // 일 최고기온 (℃)
+  maxPOP: string;     // 최대 강수확률 (%)
+  sky:  string;       // 대표 하늘상태 (가장 많이 나온 값)
+  pty:  string;       // 대표 강수형태
+}
+
+export interface VilageFcstParams {
+  base_date: string;  // 발표일자 (YYYYMMDD), 필수
+  base_time: string;  // 발표시각 (0200/0500/0800/1100/1400/1700/2000/2300), 필수
+  nx: number;         // 예보지점 X 좌표, 필수
+  ny: number;         // 예보지점 Y 좌표, 필수
+  ServiceKey: string; // 인증키, 필수
+}
+
+/** 주요 지역 격자 좌표 */
+export const GRID_LOCATIONS: Record<string, { nx: number; ny: number; label: string }> = {
+  서울:   { nx: 60,  ny: 127, label: '서울' },
+  부산:   { nx: 98,  ny: 76,  label: '부산' },
+  대구:   { nx: 89,  ny: 90,  label: '대구' },
+  인천:   { nx: 55,  ny: 124, label: '인천' },
+  광주:   { nx: 58,  ny: 74,  label: '광주' },
+  대전:   { nx: 67,  ny: 100, label: '대전' },
+  울산:   { nx: 102, ny: 84,  label: '울산' },
+  세종:   { nx: 66,  ny: 103, label: '세종' },
+  수원:   { nx: 60,  ny: 121, label: '수원' },
+  춘천:   { nx: 73,  ny: 134, label: '춘천' },
+  강릉:   { nx: 92,  ny: 131, label: '강릉' },
+  청주:   { nx: 69,  ny: 107, label: '청주' },
+  전주:   { nx: 63,  ny: 89,  label: '전주' },
+  제주:   { nx: 52,  ny: 38,  label: '제주' },
+};

@@ -1,12 +1,12 @@
-# 한국천문연구원 OpenAPI 예제 (TypeScript)
+# 한국천문연구원 / 기상청 OpenAPI 예제 (TypeScript)
 
-공공데이터포털 한국천문연구원 천문우주정보 OpenAPI를 TypeScript로 호출하는 예제 모음입니다.
+공공데이터포털 한국천문연구원 천문우주정보 및 기상청 단기예보 OpenAPI를 TypeScript로 호출하는 예제 모음입니다.
 
 ---
 
 ## 전달 파일 목록
 
-다른 프로젝트에 적용할 때 아래 파일을 복사하면 됩니다. (`node_modules`, `.env`, `OpenAPI.pdf` 제외)
+다른 프로젝트에 적용할 때 아래 파일을 복사하면 됩니다. (`node_modules`, `.env`, `*.pdf` 제외)
 
 ```
 📦 프로젝트 루트
@@ -17,6 +17,7 @@
  ├── getJulDayInfo.ts          ← 음양력 달력 / 율리우스적일 조회
  ├── getSolCalInfo.ts          ← 음력 → 양력 변환 조회
  ├── getAstroEventInfo.ts      ← 천문현상 정보 조회
+ ├── getVilageFcst.ts          ← 기상청 단기예보 조회 (기온/강수/하늘/풍속 등)
  ├── package.json              ← 의존성 및 실행 스크립트
  ├── tsconfig.json             ← TypeScript 컴파일 설정
  └── .env                      ← 인증키 설정 (직접 생성 필요)
@@ -36,8 +37,8 @@ npm install
 
 ### 2. 인증키 설정
 
-공공데이터포털(https://data.go.kr)에서 **한국천문연구원 RiseSetInfoService** 활용신청 후
-발급받은 인증키를 `.env` 파일에 저장합니다.
+공공데이터포털(https://data.go.kr)에서 활용신청 후 발급받은 인증키를 `.env` 파일에 저장합니다.  
+한국천문연구원 서비스와 기상청 서비스 키가 **동일한 공공데이터포털 계정 키**이면 하나만 설정해도 됩니다.
 
 ```bash
 # .env 파일 생성
@@ -53,6 +54,7 @@ npm run lunph    # 월령 정보 조회
 npm run julday   # 음양력 달력 / 율리우스적일 조회
 npm run solcal   # 음력 → 양력 변환
 npm run astro    # 천문현상 정보 조회
+npm run weather  # 기상청 단기예보 조회 (서울/부산/제주)
 ```
 
 ---
@@ -194,6 +196,56 @@ npm run astro    # 천문현상 정보 조회
 
 ---
 
+### 7. 기상청 단기예보 (`getVilageFcst`)
+
+| 항목 | 내용 |
+|---|---|
+| 파일 | `getVilageFcst.ts` |
+| 서비스 | `VilageFcstInfoService_2.0` |
+| 엔드포인트 | `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst` |
+| 발표 주기 | 하루 8회 (02/05/08/11/14/17/20/23시) |
+| 예보 기간 | 발표 기준 약 5일치 (시간별) |
+
+**요청 파라미터**
+
+| 파라미터 | 필수 | 설명 | 예시 |
+|---|---|---|---|
+| `base_date` | ✅ | 발표일자 (YYYYMMDD) | `20260501` |
+| `base_time` | ✅ | 발표시각 (HHMM) | `1700` |
+| `nx` | ✅ | 예보지점 격자 X 좌표 | `60` (서울) |
+| `ny` | ✅ | 예보지점 격자 Y 좌표 | `127` (서울) |
+
+> `base_time`은 코드 내 `getLatestBaseTime()`이 현재 KST 기준으로 자동 계산합니다.
+
+**주요 응답 카테고리 (category)**
+
+| 코드 | 항목 | 단위 | 비고 |
+|---|---|---|---|
+| `TMP` | 1시간 기온 | ℃ | |
+| `TMN` | 일 최저기온 | ℃ | 특정 시각에만 포함 |
+| `TMX` | 일 최고기온 | ℃ | 특정 시각에만 포함 |
+| `SKY` | 하늘상태 | 코드 | 1=맑음 / 3=구름많음 / 4=흐림 |
+| `PTY` | 강수형태 | 코드 | 0=없음 / 1=비 / 2=비/눈 / 3=눈 / 4=소나기 |
+| `POP` | 강수확률 | % | |
+| `REH` | 습도 | % | |
+| `WSD` | 풍속 | m/s | |
+| `VEC` | 풍향 | deg | 0~360, 16방위 자동 변환 |
+| `PCP` | 1시간 강수량 | mm | 연장예보는 정성값(1/2/3) |
+| `SNO` | 1시간 신적설 | cm | 연장예보는 정성값(1/2) |
+
+**내장 격자 좌표 (`GRID_LOCATIONS` in `types.ts`)**
+
+서울(60,127) / 부산(98,76) / 대구(89,90) / 인천(55,124) / 광주(58,74)  
+대전(67,100) / 울산(102,84) / 세종(66,103) / 수원(60,121) / 춘천(73,134)  
+강릉(92,131) / 청주(69,107) / 전주(63,89) / 제주(52,38)
+
+**출력 구성**
+
+- **일별 요약 테이블**: 최저·최고기온, 최대 강수확률, 대표 하늘상태, 강수형태
+- **시간별 상세 예보 (향후 48시간)**: 기온, 강수확률, 습도, 풍향·풍속, 하늘상태, 강수형태, 강수량
+
+---
+
 ## 프로젝트 구조
 
 ```
@@ -204,6 +256,8 @@ types.ts
     LunCalItem / LunCalResponse / LunCalParams   ← 음양력 달력 + 율리우스적일
     SolCalItem / SolCalResponse / SolCalParams   ← 음력→양력 변환
     AstroEventItem / AstroEventResponse / AstroEventParams
+    VilageFcstRawItem / VilageFcstHourly / VilageFcstDaily / VilageFcstParams
+    GRID_LOCATIONS                               ← 기상청 격자 좌표 (14개 주요 도시)
 ```
 
 ---
@@ -216,6 +270,7 @@ types.ts
 | LunPhInfoService | `https://apis.data.go.kr/B090041/openapi/service/LunPhInfoService` |
 | LrsrCldInfoService | `https://apis.data.go.kr/B090041/openapi/service/LrsrCldInfoService` |
 | AstroEventInfoService | `https://apis.data.go.kr/B090041/openapi/service/AstroEventInfoService` |
+| VilageFcstInfoService_2.0 | `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0` |
 
 ---
 
