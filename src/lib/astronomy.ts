@@ -81,11 +81,64 @@ export function getWindDirection(deg: number): string {
 }
 
 /** Unix timestamp → HH:mm KST */
-export function formatSunTime(unix: number): string {
+export function formatSunTime(unix: number | null | undefined): string {
+  if (unix == null || isNaN(unix)) return '--:--'
   return new Date(unix * 1000).toLocaleTimeString('ko-KR', {
     timeZone: 'Asia/Seoul',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
   })
+}
+
+/**
+ * USNO 일출/일몰 알고리즘으로 로컬 계산 (API 실패 시 폴백)
+ * 정확도 ~수분 이내
+ */
+export function computeSunriseSunset(
+  lat: number,
+  lon: number,
+  date: Date = new Date(),
+): { sunrise: number; sunset: number } | null {
+  const DEG = Math.PI / 180
+  const jd = date.getTime() / 86400000 + 2440587.5
+
+  // Julian cycle
+  const n = Math.floor(jd - 2451545.0 + 0.0008)
+  const Jstar = n - lon / 360
+
+  // Solar mean anomaly
+  const M = ((357.5291 + 0.98560028 * Jstar) % 360 + 360) % 360
+
+  // Equation of center
+  const C =
+    1.9148 * Math.sin(M * DEG) +
+    0.0200 * Math.sin(2 * M * DEG) +
+    0.0003 * Math.sin(3 * M * DEG)
+
+  // Ecliptic longitude
+  const lambda = ((M + C + 180 + 102.9372) % 360 + 360) % 360
+
+  // Solar transit
+  const Jtransit =
+    2451545.0 + Jstar + 0.0053 * Math.sin(M * DEG) - 0.0069 * Math.sin(2 * lambda * DEG)
+
+  // Declination
+  const sinDec = Math.sin(lambda * DEG) * Math.sin(23.4397 * DEG)
+  const dec = Math.asin(sinDec)
+
+  // Hour angle
+  const cosH =
+    (Math.sin(-0.8333 * DEG) - Math.sin(lat * DEG) * sinDec) /
+    (Math.cos(lat * DEG) * Math.cos(dec))
+
+  if (cosH > 1 || cosH < -1) return null // 극야 또는 백야
+
+  const w0 = Math.acos(cosH) / (360 * DEG) // fraction of day
+  const jdToUnix = (j: number) => Math.round((j - 2440587.5) * 86400)
+
+  return {
+    sunrise: jdToUnix(Jtransit - w0),
+    sunset:  jdToUnix(Jtransit + w0),
+  }
 }

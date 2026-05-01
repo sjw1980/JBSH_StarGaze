@@ -19,8 +19,6 @@ export default function Home() {
     setMoonPhase,
     setWeatherLoading,
     setWeatherError,
-    showConstellationLines,
-    toggleConstellationLines,
   } = useStore()
 
   const fetchAll = useCallback(async () => {
@@ -102,22 +100,11 @@ export default function Home() {
           <ClockDisplay />
         </header>
 
-        {/* Drag hint + constellation toggle */}
-        <div className="flex justify-center items-center gap-4 mt-2">
+        {/* Drag hint */}
+        <div className="flex justify-center items-center mt-2">
           <span className="text-xs text-slate-600 tracking-widest select-none">
             ← 드래그하여 천구 탐색 →
           </span>
-          <button
-            onClick={toggleConstellationLines}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all select-none ${
-              showConstellationLines
-                ? 'bg-blue-900/60 border-blue-500/60 text-blue-300'
-                : 'bg-slate-900/40 border-slate-600/40 text-slate-500 hover:text-slate-400'
-            }`}
-          >
-            <span className="text-[10px]">✦</span>
-            별자리 선
-          </button>
         </div>
 
         {/* Spacer */}

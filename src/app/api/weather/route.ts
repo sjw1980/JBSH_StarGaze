@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { OBSERVATORY } from '@/lib/constants'
+import { computeSunriseSunset } from '@/lib/astronomy'
 import {
   latLonToGrid,
   fetchVilageFcst,
@@ -59,8 +60,14 @@ export async function GET() {
     const kstNow  = new Date(Date.now() + 9 * 60 * 60 * 1000)
     const isNight = kstNow.getUTCHours() < 6 || kstNow.getUTCHours() >= 19
 
-    const sunrise = riseSetToUnix(riseSet.sunrise, today)
-    const sunset  = riseSetToUnix(riseSet.sunset, today)
+    const apiSunrise = riseSetToUnix(riseSet.sunrise, today)
+    const apiSunset  = riseSetToUnix(riseSet.sunset, today)
+    // API가 빈 문자열이나 잘못된 값을 반환하면 로컈 천문적 계산으로 폴백
+    const localSun = (apiSunrise == null || apiSunset == null)
+      ? computeSunriseSunset(OBSERVATORY.lat, OBSERVATORY.lon, new Date())
+      : null
+    const sunrise = apiSunrise ?? localSun?.sunrise ?? null
+    const sunset  = apiSunset  ?? localSun?.sunset  ?? null
 
     const rain =
       (current.PTY === '1' || current.PTY === '4') &&

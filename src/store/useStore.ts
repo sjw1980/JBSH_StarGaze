@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { subscribeWithSelector } from 'zustand/middleware'
 import type { PanelType, WeatherData, ForecastItem } from '@/types'
 
 interface StoreState {
@@ -15,12 +14,9 @@ interface StoreState {
   setMoonPhase: (phase: number) => void
   setWeatherLoading: (loading: boolean) => void
   setWeatherError: (error: string | null) => void
-  showConstellationLines: boolean
-  toggleConstellationLines: () => void
 }
 
-export const useStore = create<StoreState>()(
-  subscribeWithSelector((set) => ({
+export const useStore = create<StoreState>()((set) => ({
     expandedPanel: null,
     togglePanel: (panel) =>
       set((state) => ({
@@ -36,8 +32,4 @@ export const useStore = create<StoreState>()(
     setMoonPhase: (phase) => set({ moonPhase: phase }),
     setWeatherLoading: (loading) => set({ isWeatherLoading: loading }),
     setWeatherError: (error) => set({ weatherError: error }),
-    showConstellationLines: true,
-    toggleConstellationLines: () =>
-      set((state) => ({ showConstellationLines: !state.showConstellationLines })),
-  })),
-)
+}))

@@ -154,16 +154,20 @@ export function windChill(temp: number, windSpeed: number): number {
   )
 }
 
-/** HHMMSS(KST) + YYYYMMDD → Unix timestamp (초) */
-export function riseSetToUnix(hhmmss: string, yyyymmdd: string): number {
+/** HHMMSS 또는 HHMM(KST) + YYYYMMDD → Unix timestamp (초)
+ *  KASI API가 빈 문자열이나 4자리(HHMM)를 반환하는 경우도 처리 */
+export function riseSetToUnix(hhmmss: string, yyyymmdd: string): number | null {
+  if (!hhmmss || hhmmss.length < 4) return null
   const year  = parseInt(yyyymmdd.slice(0, 4), 10)
   const month = parseInt(yyyymmdd.slice(4, 6), 10) - 1
   const day   = parseInt(yyyymmdd.slice(6, 8), 10)
   const hh    = parseInt(hhmmss.slice(0, 2), 10)
   const mm    = parseInt(hhmmss.slice(2, 4), 10)
-  const ss    = parseInt(hhmmss.slice(4, 6), 10)
+  const ss    = hhmmss.length >= 6 ? parseInt(hhmmss.slice(4, 6), 10) : 0
+  if (isNaN(hh) || isNaN(mm) || isNaN(ss)) return null
   // KST(+9h) → UTC
-  return Math.floor(Date.UTC(year, month, day, hh, mm, ss) / 1000) - 9 * 3600
+  const ts = Math.floor(Date.UTC(year, month, day, hh, mm, ss) / 1000) - 9 * 3600
+  return isNaN(ts) ? null : ts
 }
 
 // ─── API 엔드포인트 ────────────────────────────────────────────
@@ -303,12 +307,12 @@ export async function fetchRiseSet(
   const item  = parsed.response?.body?.items?.item
   const first = Array.isArray(item) ? item[0] : item
   return {
-    sunrise:  first?.sunrise  ?? '060000',
-    sunset:   first?.sunset   ?? '190000',
-    moonrise: first?.moonrise ?? '',
-    moonset:  first?.moonset  ?? '',
-    astm:     first?.astm     ?? '',
-    aste:     first?.aste     ?? '',
+    sunrise:  first?.sunrise  || '060000',
+    sunset:   first?.sunset   || '190000',
+    moonrise: first?.moonrise || '',
+    moonset:  first?.moonset  || '',
+    astm:     first?.astm     || '',
+    aste:     first?.aste     || '',
   }
 }
 

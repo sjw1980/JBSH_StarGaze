@@ -2,42 +2,25 @@
 
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { NAMED_STARS, CATALOG_STARS, CONSTELLATIONS, type StarEntry } from '@/lib/starCatalog'
-import { useStore } from '@/store/useStore'
+import { NAMED_STARS, CATALOG_STARS, type StarEntry } from '@/lib/starCatalog'
 
 const DEG2RAD = Math.PI / 180
 const R = 500
 
-/**
- * Calculate approximate Sun RA/Dec for a given Date.
- * Uses a simplified VSOP87 approach (accuracy ~1 arcminute).
- */
 function getSunRaDec(date: Date): { ra: number; dec: number } {
-  // Julian Day Number
   const jd = date.getTime() / 86400000 + 2440587.5
-  const n = jd - 2451545.0  // days since J2000.0
-
-  // Mean longitude and anomaly (degrees)
+  const n = jd - 2451545.0
   const L = (280.460 + 0.9856474 * n) % 360
   const g = ((357.528 + 0.9856003 * n) % 360) * DEG2RAD
-
-  // Ecliptic longitude (degrees)
   const lambda = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG2RAD
-
-  // Obliquity of ecliptic (degrees)
   const eps = (23.439 - 0.0000004 * n) * DEG2RAD
-
-  // RA and Dec (radians → degrees)
   const ra = Math.atan2(Math.cos(eps) * Math.sin(lambda), Math.cos(lambda)) / DEG2RAD
   const dec = Math.asin(Math.sin(eps) * Math.sin(lambda)) / DEG2RAD
-
   return { ra: (ra + 360) % 360, dec }
 }
 
 function buildSunMesh(ra: number, dec: number): THREE.Object3D {
   const pos = raDecTo3D(ra, dec)
-
-  // Glow sprite using canvas texture
   const canvas = document.createElement('canvas')
   canvas.width = 128
   canvas.height = 128
@@ -50,13 +33,11 @@ function buildSunMesh(ra: number, dec: number): THREE.Object3D {
   grad.addColorStop(1.0, 'rgba(255, 80,    0, 0.0)')
   ctx.fillStyle = grad
   ctx.fillRect(0, 0, 128, 128)
-
   const tex = new THREE.CanvasTexture(canvas)
   const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })
   const sprite = new THREE.Sprite(mat)
   sprite.position.copy(pos)
   sprite.scale.set(30, 30, 1)
-
   return sprite
 }
 
@@ -81,14 +62,13 @@ function bvToRgb(bv: number): [number, number, number] {
 }
 
 function magToSize(mag: number): number {
-  return Math.max(0.3, Math.min(9.0, (8.0 - mag) * 0.85 + 0.5))
+  return Math.max(0.2, Math.min(9.0, (8.0 - mag) * 0.85 + 0.5))
 }
 
 function buildStarMesh(stars: StarEntry[]): THREE.Points {
   const positions: number[] = []
   const colors: number[] = []
   const sizes: number[] = []
-
   for (const s of stars) {
     const v = raDecTo3D(s.ra, s.dec)
     positions.push(v.x, v.y, v.z)
@@ -96,12 +76,10 @@ function buildStarMesh(stars: StarEntry[]): THREE.Points {
     colors.push(r, g, b)
     sizes.push(magToSize(s.mag))
   }
-
   const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geo.setAttribute('starColor', new THREE.Float32BufferAttribute(colors, 3))
   geo.setAttribute('starSize', new THREE.Float32BufferAttribute(sizes, 1))
-
   const mat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -127,7 +105,6 @@ function buildStarMesh(stars: StarEntry[]): THREE.Points {
       }
     `,
   })
-
   return new THREE.Points(geo, mat)
 }
 
@@ -135,7 +112,6 @@ function buildMilkyWay(count: number): THREE.Points {
   const positions: number[] = []
   const colors: number[] = []
   const sizes: number[] = []
-
   for (let i = 0; i < count; i++) {
     const glon = Math.random() * Math.PI * 2
     const glat = ((Math.random() + Math.random() + Math.random() - 1.5) / 1.5) * (12 * DEG2RAD)
@@ -154,12 +130,10 @@ function buildMilkyWay(count: number): THREE.Points {
     colors.push(b, b, Math.min(1, b + 0.06))
     sizes.push(0.2 + Math.random() * 0.6)
   }
-
   const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geo.setAttribute('starColor', new THREE.Float32BufferAttribute(colors, 3))
   geo.setAttribute('starSize', new THREE.Float32BufferAttribute(sizes, 1))
-
   const mat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -184,47 +158,65 @@ function buildMilkyWay(count: number): THREE.Points {
       }
     `,
   })
-
   return new THREE.Points(geo, mat)
 }
 
-function buildConstellationLines(): THREE.LineSegments | null {
-  const hipMap = new Map<number, THREE.Vector3>()
-  for (const s of NAMED_STARS) {
-    if (s.hip !== undefined) {
-      hipMap.set(s.hip, raDecTo3D(s.ra, s.dec))
-    }
-  }
-
+/**
+ * 8~12등급 별 배경 필드 (구면 균등 분포, 15000개)
+ * 실제 별 밀도: 어두운 별일수록 급격히 증가 → pow(random, 0.35)로 근사
+ */
+function buildFaintStarField(count: number): THREE.Points {
   const positions: number[] = []
-
-  for (const c of CONSTELLATIONS) {
-    for (const [hipA, hipB] of c.lines) {
-      const a = hipMap.get(hipA)
-      const b = hipMap.get(hipB)
-      if (!a || !b) continue
-      const scale = 0.997
-      positions.push(a.x * scale, a.y * scale, a.z * scale)
-      positions.push(b.x * scale, b.y * scale, b.z * scale)
-    }
+  const colors: number[] = []
+  const sizes: number[] = []
+  for (let i = 0; i < count; i++) {
+    const cosTheta = 2 * Math.random() - 1
+    const phi = 2 * Math.PI * Math.random()
+    const sinTheta = Math.sqrt(1 - cosTheta * cosTheta)
+    positions.push(
+      R * sinTheta * Math.cos(phi),
+      R * cosTheta,
+      R * sinTheta * Math.sin(phi),
+    )
+    const mag = 8.0 + Math.pow(Math.random(), 0.35) * 4.0
+    const bv = 0.3 + Math.random() * 0.9
+    const [r, g, b] = bvToRgb(bv)
+    colors.push(r, g, b)
+    sizes.push(magToSize(mag))
   }
-
   const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-
-  const mat = new THREE.LineBasicMaterial({
-    color: 0x4488cc,
+  geo.setAttribute('starColor', new THREE.Float32BufferAttribute(colors, 3))
+  geo.setAttribute('starSize', new THREE.Float32BufferAttribute(sizes, 1))
+  const mat = new THREE.ShaderMaterial({
     transparent: true,
-    opacity: 0.35,
     depthWrite: false,
+    vertexShader: `
+      attribute vec3 starColor;
+      attribute float starSize;
+      varying vec3 vColor;
+      void main() {
+        vColor = starColor;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = starSize * (300.0 / length(mvPos.xyz));
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        float d = distance(gl_PointCoord, vec2(0.5));
+        if (d > 0.5) discard;
+        float alpha = (1.0 - smoothstep(0.1, 0.5, d)) * 0.8;
+        gl_FragColor = vec4(vColor, alpha);
+      }
+    `,
   })
-
-  return new THREE.LineSegments(geo, mat)
+  return new THREE.Points(geo, mat)
 }
 
 export default function StarCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const showLines = useStore((s) => s.showConstellationLines)
 
   useEffect(() => {
     const container = containerRef.current
@@ -233,12 +225,7 @@ export default function StarCanvas() {
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0x020817)
 
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000,
-    )
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
     camera.position.set(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -246,28 +233,13 @@ export default function StarCanvas() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     container.appendChild(renderer.domElement)
 
-    // Real star catalog
+    // 레이어 순서: 어두운 별 → 은하수 → 밝은 카탈로그 별 → 태양
+    scene.add(buildFaintStarField(15000))
+    scene.add(buildMilkyWay(6000))
     const allStars = [...NAMED_STARS, ...CATALOG_STARS]
     scene.add(buildStarMesh(allStars))
-    scene.add(buildMilkyWay(6000))
-
-    // Sun position based on current date
     const sunPos = getSunRaDec(new Date())
     scene.add(buildSunMesh(sunPos.ra, sunPos.dec))
-
-    // Constellation lines mesh (toggled externally via showLines)
-    const linesMesh = buildConstellationLines()
-    if (linesMesh) {
-      linesMesh.visible = useStore.getState().showConstellationLines
-      scene.add(linesMesh)
-    }
-
-    const unsubscribe = useStore.subscribe(
-      (state) => state.showConstellationLines,
-      (visible) => {
-        if (linesMesh) linesMesh.visible = visible
-      },
-    )
 
     // Horizon haze
     const hazeGeo = new THREE.CylinderGeometry(490, 490, 80, 64, 1, true)
@@ -282,7 +254,6 @@ export default function StarCanvas() {
     haze.position.y = -40
     scene.add(haze)
 
-    // Interaction
     let pointerDown = false
     let lastX = 0
     let lastY = 0
@@ -336,7 +307,6 @@ export default function StarCanvas() {
 
     return () => {
       cancelAnimationFrame(rafId)
-      unsubscribe()
       window.removeEventListener('pointerdown', onPointerDown)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
@@ -347,11 +317,6 @@ export default function StarCanvas() {
       }
     }
   }, [])
-
-  // Keep lines visibility in sync without full remount
-  useEffect(() => {
-    // handled via zustand subscribe inside the main effect
-  }, [showLines])
 
   return (
     <div

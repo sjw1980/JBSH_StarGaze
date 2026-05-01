@@ -8,8 +8,8 @@ export interface WeatherData {
   visibility: number
   description: string
   icon: string
-  sunrise: number
-  sunset: number
+  sunrise: number | null
+  sunset: number | null
   rain?: { '1h': number }
   snow?: { '1h': number }
   moonPhase?: number
