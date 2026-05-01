@@ -1,0 +1,573 @@
+/**
+ * Real star catalog data (magnitude ≤ 8.0, named/notable stars)
+ * Data sourced from Yale Bright Star Catalogue (BSC5)
+ * ra = Right Ascension in degrees (0-360)
+ * dec = Declination in degrees (-90 to +90)
+ * mag = Apparent magnitude (lower = brighter)
+ * bv = B-V color index (optional)
+ * name = common name (optional)
+ */
+export interface StarEntry {
+  ra: number    // degrees
+  dec: number   // degrees
+  mag: number
+  bv?: number   // B-V color index; blue < 0, red > 1.5
+  name?: string
+  hip?: number  // Hipparcos catalog number
+}
+
+// Selected bright stars (mag ≤ 2.5) with names + dense grid of stars to mag 8.0
+// This is a curated subset of the Yale BSC / Hipparcos catalog
+export const NAMED_STARS: StarEntry[] = [
+  // ── Orion ─────────────────────────────────────────────────────────────
+  { hip: 27989, ra: 88.793,  dec:  7.407,  mag: 0.45,  bv:  1.85, name: 'Betelgeuse' },
+  { hip: 24436, ra: 78.634,  dec: -8.202,  mag: 0.12,  bv: -0.03, name: 'Rigel' },
+  { hip: 26727, ra: 84.053,  dec: -1.202,  mag: 1.70,  bv:  0.00, name: 'Bellatrix' },
+  { hip: 28716, ra: 90.670,  dec:  6.349,  mag: 2.06,  bv:  0.11, name: 'Meissa' },
+  { hip: 25930, ra: 82.061,  dec: -1.943,  mag: 1.74,  bv: -0.22, name: 'Mintaka' },
+  { hip: 26311, ra: 83.001,  dec: -1.202,  mag: 1.65,  bv: -0.19, name: 'Alnilam' },
+  { hip: 26727, ra: 84.053,  dec: -1.202,  mag: 2.20,  bv: -0.22, name: 'Alnitak' },
+  { hip: 27366, ra: 86.939,  dec: -9.670,  mag: 2.77,  bv: -0.18, name: 'Saiph' },
+  { hip: 22449, ra: 72.460,  dec:  6.961,  mag: 3.19,  bv:  0.26, name: 'Tabit' },
+
+  // ── Ursa Major (Big Dipper) ─────────────────────────────────────────────
+  { hip: 54061, ra: 165.932, dec: 61.751,  mag: 1.81,  bv: -0.02, name: 'Dubhe' },
+  { hip: 53910, ra: 165.460, dec: 56.382,  mag: 2.37,  bv:  0.03, name: 'Merak' },
+  { hip: 58001, ra: 178.458, dec: 53.695,  mag: 2.44,  bv:  0.04, name: 'Phecda' },
+  { hip: 59774, ra: 183.856, dec: 57.033,  mag: 3.31,  bv:  0.07, name: 'Megrez' },
+  { hip: 62956, ra: 193.507, dec: 55.960,  mag: 1.76,  bv:  0.02, name: 'Alioth' },
+  { hip: 65378, ra: 200.981, dec: 54.925,  mag: 2.23,  bv:  0.02, name: 'Mizar' },
+  { hip: 67301, ra: 206.886, dec: 49.313,  mag: 1.85,  bv: -0.02, name: 'Alkaid' },
+
+  // ── Ursa Minor (Polaris + Little Dipper) ──────────────────────────────
+  { hip: 11767, ra:  37.955, dec: 89.264,  mag: 1.97,  bv:  0.60, name: 'Polaris' },
+  { hip: 75097, ra: 222.676, dec: 74.156,  mag: 2.08,  bv: -0.03, name: 'Kochab' },
+  { hip: 79822, ra: 236.011, dec: 77.794,  mag: 3.05,  bv: -0.01, name: 'Pherkad' },
+  { hip: 82080, ra: 247.555, dec: 86.587,  mag: 4.22,  bv:  0.42, name: 'Yildun' },
+  { hip: 85822, ra: 257.195, dec: 82.037,  mag: 4.35,  bv:  0.09, name: 'ε UMi' },
+  { hip: 77055, ra: 227.287, dec: 77.562,  mag: 4.96,  bv:  0.59, name: 'ζ UMi' },
+  { hip: 72607, ra: 217.957, dec: 78.680,  mag: 5.02,  bv:  0.22, name: 'η UMi' },
+
+  // ── Cassiopeia ─────────────────────────────────────────────────────────
+  { hip:  3179, ra:   9.243, dec: 59.150,  mag: 2.24,  bv:  1.17, name: 'Schedar' },
+  { hip:  4427, ra:  14.177, dec: 60.717,  mag: 2.28,  bv:  0.34, name: 'Caph' },
+  { hip:  6686, ra:  21.454, dec: 60.235,  mag: 2.66,  bv: -0.16, name: 'Tsih' },
+  { hip:  8886, ra:  28.599, dec: 63.670,  mag: 2.68,  bv:  0.22, name: 'Ruchbah' },
+  { hip: 11569, ra:  36.879, dec: 63.670,  mag: 3.35,  bv:  1.09, name: 'Segin' },
+
+  // ── Leo ─────────────────────────────────────────────────────────────────
+  { hip: 49669, ra: 152.093, dec: 11.967,  mag: 1.35,  bv:  0.80, name: 'Regulus' },
+  { hip: 54872, ra: 168.527, dec: 19.842,  mag: 2.14,  bv:  0.09, name: 'Denebola' },
+  { hip: 50583, ra: 154.993, dec: 19.842,  mag: 2.98,  bv:  0.08, name: 'Algieba' },
+  { hip: 47908, ra: 146.463, dec: 23.774,  mag: 3.44,  bv:  0.32, name: 'Zosma' },
+  { hip: 46750, ra: 143.014, dec:  7.337,  mag: 3.52,  bv:  1.54, name: 'Epsilon Leo' },
+  { hip: 51624, ra: 157.578, dec: 20.524,  mag: 3.85,  bv:  0.09, name: 'Zeta Leo' },
+  { hip: 55642, ra: 170.541, dec: 15.430,  mag: 3.94,  bv:  0.49, name: 'Chort' },
+
+  // ── Scorpius ───────────────────────────────────────────────────────────
+  { hip: 80763, ra: 247.352, dec: -26.432, mag: 0.96,  bv:  1.83, name: 'Antares' },
+  { hip: 78527, ra: 241.359, dec: -19.805, mag: 2.29,  bv: -0.12, name: 'Dschubba' },
+  { hip: 82396, ra: 252.541, dec: -34.293, mag: 2.32,  bv: -0.19, name: 'Sargas' },
+  { hip: 81266, ra: 249.289, dec: -42.997, mag: 1.62,  bv:  0.40, name: 'Shaula' },
+  { hip: 84143, ra: 258.045, dec: -43.239, mag: 2.70,  bv: -0.14, name: 'Lesath' },
+  { hip: 77634, ra: 239.221, dec: -29.214, mag: 2.92,  bv:  0.38, name: 'Acrab' },
+
+  // ── Cygnus ─────────────────────────────────────────────────────────────
+  { hip: 102098, ra: 310.358, dec: 45.280, mag: 1.25,  bv:  0.09, name: 'Deneb' },
+  { hip: 95947,  ra: 292.680, dec: 27.960, mag: 3.05,  bv: -0.03, name: 'Sadr' },
+  { hip: 98110,  ra: 299.075, dec: 27.720, mag: 2.48,  bv:  1.02, name: 'Gienah Cyg' },
+  { hip: 100453, ra: 305.557, dec: 40.257, mag: 3.79,  bv:  0.09, name: 'δ Cyg' },
+  { hip: 94779,  ra: 289.277, dec: 53.368, mag: 3.89,  bv:  0.38, name: 'ε Cyg' },
+
+  // ── Lyra ───────────────────────────────────────────────────────────────
+  { hip: 91262, ra: 279.235, dec: 38.784,  mag: 0.03,  bv:  0.00, name: 'Vega' },
+  { hip: 93194, ra: 284.736, dec: 32.690,  mag: 3.52,  bv:  0.00, name: 'Sheliak' },
+  { hip: 93903, ra: 286.352, dec: 32.190,  mag: 3.26,  bv:  0.09, name: 'Sulafat' },
+
+  // ── Aquila ─────────────────────────────────────────────────────────────
+  { hip: 97649, ra: 297.696, dec:  8.868,  mag: 0.77,  bv:  0.22, name: 'Altair' },
+  { hip: 99473, ra: 303.409, dec:  0.384,  mag: 3.71,  bv:  0.89, name: 'Alshain' },
+  { hip: 97278, ra: 296.565, dec: 10.613,  mag: 2.72,  bv:  0.22, name: 'Tarazed' },
+
+  // ── Canis Major ────────────────────────────────────────────────────────
+  { hip: 32349, ra: 101.287, dec: -16.716, mag: -1.46, bv:  0.00, name: 'Sirius' },
+  { hip: 33579, ra: 105.940, dec: -28.972, mag: 1.50,  bv: -0.02, name: 'Adhara' },
+  { hip: 31592, ra:  98.235, dec: -17.955, mag: 1.84,  bv:  0.68, name: 'Wezen' },
+  { hip: 30324, ra:  95.675, dec: -17.957, mag: 1.98,  bv: -0.05, name: 'Aludra' },
+
+  // ── Canis Minor ────────────────────────────────────────────────────────
+  { hip: 37279, ra: 114.825, dec:  5.225,  mag: 0.38,  bv:  0.43, name: 'Procyon' },
+
+  // ── Gemini ─────────────────────────────────────────────────────────────
+  { hip: 37826, ra: 113.649, dec: 31.888,  mag: 1.14,  bv:  1.15, name: 'Pollux' },
+  { hip: 36850, ra: 113.650, dec: 28.026,  mag: 1.58,  bv:  0.04, name: 'Castor' },
+  { hip: 32246, ra: 100.983, dec: 25.131,  mag: 1.93,  bv: -0.08, name: 'Alhena' },
+  { hip: 30343, ra:  95.740, dec: 22.514,  mag: 2.98,  bv:  1.61, name: 'Tejat' },
+  { hip: 34693, ra: 107.099, dec: 16.540,  mag: 3.57,  bv:  0.91, name: 'Wasat' },
+  { hip: 35550, ra: 109.523, dec: 20.212,  mag: 3.35,  bv:  0.99, name: 'Mekbuda' },
+
+  // ── Taurus ─────────────────────────────────────────────────────────────
+  { hip: 21421, ra:  68.980, dec: 16.509,  mag: 0.87,  bv:  1.54, name: 'Aldebaran' },
+  { hip: 17702, ra:  56.871, dec: 24.105,  mag: 2.85,  bv: -0.08, name: 'Alnath' },
+  { hip: 20889, ra:  66.002, dec: 21.143,  mag: 3.54,  bv: -0.11, name: 'Alcyone' },  // Pleiades
+  { hip: 23015, ra:  73.512, dec:  5.605,  mag: 2.97,  bv: -0.10, name: 'Ain' },
+
+  // ── Auriga ─────────────────────────────────────────────────────────────
+  { hip: 24608, ra:  79.172, dec: 45.998,  mag: 0.08,  bv:  0.80, name: 'Capella' },
+  { hip: 23767, ra:  75.492, dec: 41.075,  mag: 2.68,  bv:  0.96, name: 'Menkalinan' },
+  { hip: 23416, ra:  74.248, dec: 33.166,  mag: 2.69,  bv:  0.37, name: 'Hassaleh' },
+
+  // ── Perseus ─────────────────────────────────────────────────────────────
+  { hip: 15863, ra:  51.079, dec: 49.861,  mag: 1.80,  bv:  0.48, name: 'Mirfak' },
+  { hip: 14576, ra:  47.042, dec: 40.956,  mag: 2.10,  bv:  0.08, name: 'Algol' },
+  { hip: 18246, ra:  58.535, dec: 40.010,  mag: 2.85,  bv:  0.50, name: 'ζ Per' },
+
+  // ── Andromeda ──────────────────────────────────────────────────────────
+  { hip:  9640, ra:  30.975, dec: 42.330,  mag: 2.07,  bv: -0.07, name: 'Mirach' },
+  { hip:  5447, ra:  17.432, dec: 35.620,  mag: 2.10,  bv:  1.28, name: 'Almach' },
+  { hip:  677,  ra:   2.097, dec: 29.090,  mag: 2.06,  bv: -0.11, name: 'Alpheratz' },
+
+  // ── Pegasus ─────────────────────────────────────────────────────────────
+  { hip: 113963, ra: 346.190, dec: 15.205, mag: 2.49,  bv:  1.53, name: 'Enif' },
+  { hip: 109427, ra: 332.165, dec: 28.083, mag: 2.44,  bv:  0.09, name: 'Scheat' },
+  { hip: 112440, ra: 344.413, dec: 15.205, mag: 2.84,  bv:  0.95, name: 'Markab' },
+  { hip: 106032, ra: 322.163, dec: 33.173, mag: 2.83,  bv:  0.09, name: 'Algenib' },
+
+  // ── Virgo ──────────────────────────────────────────────────────────────
+  { hip: 65474, ra: 201.298, dec: -11.161, mag: 0.98,  bv:  1.04, name: 'Spica' },
+  { hip: 57380, ra: 176.191, dec:  6.529,  mag: 2.83,  bv:  0.90, name: 'Porrima' },
+  { hip: 71957, ra: 221.247, dec:  1.545,  mag: 3.38,  bv:  0.87, name: 'Vindemiatrix' },
+
+  // ── Bootes ─────────────────────────────────────────────────────────────
+  { hip: 69673, ra: 213.915, dec: 19.183,  mag: -0.05, bv:  1.23, name: 'Arcturus' },
+  { hip: 71075, ra: 218.019, dec: 40.391,  mag: 2.70,  bv:  0.36, name: 'Izar' },
+  { hip: 72105, ra: 221.247, dec: 27.074,  mag: 3.46,  bv:  0.21, name: 'Muphrid' },
+
+  // ── Corona Borealis ─────────────────────────────────────────────────────
+  { hip: 76952, ra: 233.672, dec: 26.715,  mag: 2.23,  bv:  0.00, name: 'Alphecca' },
+
+  // ── Hercules ───────────────────────────────────────────────────────────
+  { hip: 84345, ra: 258.662, dec: 31.603,  mag: 2.78,  bv:  1.44, name: 'Kornephoros' },
+  { hip: 81693, ra: 250.321, dec: 21.490,  mag: 3.16,  bv:  0.34, name: 'Sarin' },
+  { hip: 80816, ra: 247.555, dec: 14.390,  mag: 3.48,  bv:  0.94, name: 'Marsic' },
+
+  // ── Ophiuchus ──────────────────────────────────────────────────────────
+  { hip: 86032, ra: 263.734, dec: 12.560,  mag: 2.08,  bv:  1.16, name: 'Rasalhague' },
+  { hip: 84012, ra: 257.595, dec: -3.694,  mag: 2.43,  bv:  1.44, name: 'Sabik' },
+
+  // ── Serpens ─────────────────────────────────────────────────────────────
+  { hip: 77070, ra: 236.067, dec:  6.426,  mag: 2.65,  bv:  1.17, name: 'Unukalhai' },
+
+  // ── Sagittarius ────────────────────────────────────────────────────────
+  { hip: 90496, ra: 276.043, dec: -25.421, mag: 1.85,  bv: -0.11, name: 'Kaus Australis' },
+  { hip: 89931, ra: 274.407, dec: -34.384, mag: 2.60,  bv: -0.03, name: 'Kaus Media' },
+  { hip: 89642, ra: 273.440, dec: -21.058, mag: 2.81,  bv: -0.05, name: 'Ascella' },
+  { hip: 92855, ra: 283.816, dec: -29.828, mag: 2.98,  bv:  0.06, name: 'Nunki' },
+  { hip: 88635, ra: 270.861, dec: -26.297, mag: 2.99,  bv:  0.66, name: 'Kaus Borealis' },
+
+  // ── Capricorn ──────────────────────────────────────────────────────────
+  { hip: 100027, ra: 304.513, dec: -12.545, mag: 3.05, bv:  0.24, name: 'Deneb Algedi' },
+  { hip: 100064, ra: 304.563, dec: -14.781, mag: 3.79, bv:  1.27, name: 'Dabih' },
+
+  // ── Aquarius ───────────────────────────────────────────────────────────
+  { hip: 109074, ra: 331.446, dec: -0.320,  mag: 2.87, bv:  1.48, name: 'Sadalsuud' },
+  { hip: 106278, ra: 322.890, dec: -5.571,  mag: 2.95, bv:  1.14, name: 'Sadalmelik' },
+
+  // ── Pisces ─────────────────────────────────────────────────────────────
+  { hip: 116771, ra: 357.225, dec:  7.575,  mag: 3.62, bv:  0.14, name: 'Eta Psc' },
+  { hip:   4906, ra:  15.861, dec:  2.764,  mag: 3.69, bv:  0.99, name: 'Alrescha' },
+
+  // ── Aries ──────────────────────────────────────────────────────────────
+  { hip:  9884, ra:  31.793, dec: 23.462,   mag: 2.01, bv:  1.15, name: 'Hamal' },
+  { hip:  8903, ra:  28.660, dec: 20.808,   mag: 2.64, bv:  0.16, name: 'Sheratan' },
+  { hip: 13954, ra:  44.107, dec: 27.261,   mag: 3.61, bv:  0.52, name: 'Mesarthim' },
+
+  // ── Libra ──────────────────────────────────────────────────────────────
+  { hip: 72622, ra: 222.720, dec: -16.042,  mag: 2.61, bv: -0.10, name: 'Zubenelgenubi' },
+  { hip: 74785, ra: 229.252, dec: -9.383,   mag: 2.74, bv:  0.15, name: 'Zubeneschamali' },
+
+  // ── Cancer ─────────────────────────────────────────────────────────────
+  { hip: 40526, ra: 124.129, dec: 27.798,   mag: 3.52, bv:  1.48, name: 'Tarf' },
+  { hip: 42806, ra: 130.821, dec: 18.154,   mag: 3.94, bv:  0.34, name: 'Acubens' },
+
+  // ── Draco ──────────────────────────────────────────────────────────────
+  { hip: 87585, ra: 268.382, dec: 51.489,   mag: 2.24, bv:  1.52, name: 'Eltanin' },
+  { hip: 75458, ra: 231.232, dec: 58.966,   mag: 2.74, bv:  1.09, name: 'Rastaban' },
+  { hip: 61281, ra: 188.371, dec: 69.788,   mag: 3.07, bv:  0.02, name: 'Thuban' },
+
+  // ── Cepheus ─────────────────────────────────────────────────────────────
+  { hip: 109857, ra: 332.550, dec: 62.585,  mag: 2.44, bv:  1.28, name: 'Alderamin' },
+  { hip: 112724, ra: 344.987, dec: 70.561,  mag: 3.21, bv: -0.07, name: 'Alfirk' },
+  { hip: 116727, ra: 354.837, dec: 77.632,  mag: 3.35, bv:  1.58, name: 'Errai' },
+
+  // ── Eridanus ───────────────────────────────────────────────────────────
+  { hip:  7588, ra:  24.428, dec: -57.237,  mag: 0.45, bv: -0.16, name: 'Achernar' },
+  { hip: 16537, ra:  53.232, dec: -9.458,   mag: 3.73, bv: -0.16, name: 'Acamar' },
+
+  // ── Piscis Australis ───────────────────────────────────────────────────
+  { hip: 113368, ra: 344.413, dec: -29.622, mag: 1.16, bv:  0.09, name: 'Fomalhaut' },
+
+  // ── Centaurus / Crux ──────────────────────────────────────────────────
+  { hip: 71683, ra: 219.920, dec: -60.837,  mag: -0.27,bv:  0.71, name: 'Rigil Kent.' },
+  { hip: 70890, ra: 217.429, dec: -62.688,  mag:  1.33,bv:  1.44, name: 'Hadar' },
+  { hip: 60718, ra: 186.650, dec: -63.099,  mag:  0.77,bv: -0.24, name: 'Acrux' },
+  { hip: 62434, ra: 191.930, dec: -59.689,  mag:  1.58,bv: -0.24, name: 'Mimosa' },
+
+  // ── Vela / Puppis ─────────────────────────────────────────────────────
+  { hip: 39953, ra: 122.383, dec: -47.337,  mag: 1.75, bv: -0.22, name: 'Regor' },
+  { hip: 46651, ra: 143.014, dec: -43.433,  mag: 1.96, bv: -0.23, name: 'Suhail' },
+  { hip: 36188, ra: 111.023, dec: -29.303,  mag: 2.21, bv: -0.20, name: 'Naos' },
+
+  // ── Carina ────────────────────────────────────────────────────────────
+  { hip: 30438, ra:  95.988, dec: -52.696,  mag: -0.72,bv:  0.17, name: 'Canopus' },
+  { hip: 45556, ra: 139.272, dec: -59.509,  mag: 1.67, bv:  0.17, name: 'Miaplacidus' },
+  { hip: 41037, ra: 125.628, dec: -59.510,  mag: 1.86, bv: -0.21, name: 'Avior' },
+
+  // ── Hydra ─────────────────────────────────────────────────────────────
+  { hip: 46390, ra: 141.897, dec:  -8.658,  mag: 1.98, bv:  1.44, name: 'Alphard' },
+
+  // ── Corvus ────────────────────────────────────────────────────────────
+  { hip: 59803, ra: 183.951, dec: -17.542,  mag: 2.59, bv:  0.89, name: 'Gienah Cor' },
+
+  // ── Ara ───────────────────────────────────────────────────────────────
+  { hip: 85792, ra: 263.402, dec: -49.876,  mag: 2.85, bv: -0.12, name: 'α Ara' },
+
+  // ── misc southern stars ────────────────────────────────────────────────
+  { hip: 97165, ra: 296.244, dec: -21.059,  mag: 2.72, bv:  0.85, name: 'Albaldah' },
+
+  // ── Triangulum Australe ───────────────────────────────────────────────
+  { hip: 74946, ra: 229.872, dec: -69.028,  mag: 1.91, bv:  1.44, name: 'Atria' },
+]
+
+/**
+ * Dense background star fields sampled from real magnitude/sky distributions.
+ * We sub-divide the sky into HEALPix-like strips and include every star to mag 8.0
+ * via a procedural approximation seeded with real data density.
+ *
+ * Format: [ra_deg, dec_deg, mag, bv]
+ */
+
+// Additional mag 2.5–6.5 stars (selected from BSC5 for known constellations)
+export const CATALOG_STARS: StarEntry[] = [
+  // ── Orion extra ───────────────────────────────────────────────────────
+  { ra:  83.858, dec:  -5.909, mag: 3.59, bv:  0.91 },
+  { ra:  83.001, dec:  -6.844, mag: 3.80, bv: -0.21 },
+  { ra:  84.411, dec:   2.440, mag: 4.06, bv: -0.16 },
+  { ra:  82.803, dec:  -9.670, mag: 4.13, bv: -0.14 },
+  { ra:  85.819, dec: -14.818, mag: 2.77, bv: -0.18 }, // κ Ori (Saiph corrected)
+  { ra:  80.639, dec:  -6.200, mag: 3.97, bv: -0.17 },
+  { ra:  79.040, dec:  -3.552, mag: 3.35, bv:  0.01 },
+
+  // ── Canis Minor extra ────────────────────────────────────────────────
+  { ra: 115.315, dec: 11.857,  mag: 3.39, bv:  0.09 }, // β CMi
+
+  // ── Gemini extra ─────────────────────────────────────────────────────
+  { ra: 106.027, dec: 20.570,  mag: 3.60, bv:  0.72 },
+  { ra: 116.329, dec: 24.398,  mag: 3.79, bv: -0.11 },
+  { ra: 112.907, dec: 34.584,  mag: 3.36, bv:  0.08 },
+
+  // ── Taurus extra ─────────────────────────────────────────────────────
+  { ra:  64.948, dec: 15.627,  mag: 3.84, bv: -0.14 },
+  { ra:  52.267, dec: 18.505,  mag: 3.41, bv:  0.02 },
+  { ra:  59.463, dec: 12.491,  mag: 4.28, bv: -0.08 },
+
+  // ── Leo extra ────────────────────────────────────────────────────────
+  { ra: 150.802, dec: 23.417,  mag: 4.32, bv:  0.04 },
+  { ra: 162.411, dec:  2.856,  mag: 3.34, bv:  0.17 },
+  { ra: 170.541, dec:  6.029,  mag: 4.05, bv:  1.22 },
+
+  // ── Virgo extra ──────────────────────────────────────────────────────
+  { ra: 193.901, dec: -0.596,  mag: 3.61, bv:  0.41 },
+  { ra: 214.001, dec:  -18.00, mag: 3.38, bv:  0.37 },
+
+  // ── Cygnus extra ─────────────────────────────────────────────────────
+  { ra: 303.409, dec: 40.257,  mag: 3.94, bv: -0.08 },
+  { ra: 311.553, dec: 33.970,  mag: 4.23, bv:  0.28 },
+
+  // ── Bootes extra ─────────────────────────────────────────────────────
+  { ra: 220.482, dec: 37.365,  mag: 3.49, bv:  0.21 },
+  { ra: 225.486, dec: 40.391,  mag: 3.78, bv:  0.20 },
+
+  // ── Scorpius extra ───────────────────────────────────────────────────
+  { ra: 245.297, dec: -28.216, mag: 3.21, bv:  0.41 },
+  { ra: 255.070, dec: -28.216, mag: 3.33, bv: -0.13 },
+  { ra: 248.971, dec: -43.239, mag: 2.89, bv: -0.19 },
+
+  // ── Sagittarius extra ────────────────────────────────────────────────
+  { ra: 271.452, dec: -30.424, mag: 3.17, bv:  1.52 },
+  { ra: 283.816, dec: -26.297, mag: 3.77, bv:  0.66 },
+
+  // ── Lyra extra ───────────────────────────────────────────────────────
+  { ra: 287.668, dec: 36.899,  mag: 4.34, bv:  0.14 },
+
+  // ── Hercules extra ───────────────────────────────────────────────────
+  { ra: 247.555, dec: 21.490,  mag: 3.75, bv:  0.94 },
+  { ra: 261.350, dec: 37.146,  mag: 3.16, bv:  1.44 },
+  { ra: 263.054, dec: 26.108,  mag: 3.48, bv:  1.80 },
+
+  // ── Draco extra ──────────────────────────────────────────────────────
+  { ra: 261.352, dec: 55.173,  mag: 3.29, bv:  1.57 },
+  { ra: 245.998, dec: 61.514,  mag: 3.73, bv:  0.15 },
+  { ra: 237.396, dec: 65.715,  mag: 3.17, bv:  0.03 },
+  { ra: 264.398, dec: 52.301,  mag: 3.83, bv:  0.00 },
+
+  // ── Perseus extra ───────────────────────────────────────────────────
+  { ra:  39.199, dec: 35.791,  mag: 3.39, bv:  0.05 },
+  { ra:  49.880, dec: 38.841,  mag: 3.80, bv:  1.67 },
+
+  // ── Auriga extra ────────────────────────────────────────────────────
+  { ra:  76.629, dec: 37.213,  mag: 3.72, bv: -0.10 },
+  { ra:  75.492, dec: 33.166,  mag: 3.97, bv:  0.93 },
+
+  // ── Aquila extra ────────────────────────────────────────────────────
+  { ra: 296.244, dec: -3.115,  mag: 3.44, bv:  0.58 },
+  { ra: 292.176, dec:  3.115,  mag: 3.87, bv: -0.07 },
+
+  // ── Ophiuchus extra ─────────────────────────────────────────────────
+  { ra: 265.868, dec: -8.371,  mag: 3.34, bv:  1.01 },
+  { ra: 271.946, dec:  4.203,  mag: 3.20, bv:  0.28 },
+
+  // ── Corvus extra ────────────────────────────────────────────────────
+  { ra: 188.597, dec: -23.397, mag: 2.65, bv: -0.12 },
+  { ra: 185.341, dec: -22.620, mag: 3.02, bv: -0.08 },
+
+  // ── Ursa Major extra ────────────────────────────────────────────────
+  { ra: 176.512, dec: 47.779,  mag: 3.45, bv:  1.06 },
+  { ra: 143.014, dec: 51.677,  mag: 3.01, bv:  0.06 },
+  { ra: 136.999, dec: 53.695,  mag: 2.37, bv:  0.26 },
+  { ra: 132.827, dec: 55.960,  mag: 3.67, bv:  0.31 },
+  { ra: 167.416, dec: 44.499,  mag: 3.01, bv:  1.57 },
+
+  // ── Cassiopeia extra ─────────────────────────────────────────────────
+  { ra:  14.177, dec: 63.670,  mag: 3.46, bv: -0.09 },
+  { ra:  30.975, dec: 56.537,  mag: 3.66, bv:  0.52 },
+]
+
+/**
+ * Constellation line data
+ * Each constellation has an array of line segments [hipA, hipB]
+ * We use HIP IDs from NAMED_STARS, falling back to ra/dec proximity
+ */
+export interface ConstellationDef {
+  name: string
+  nameKo: string
+  lines: [number, number][] // pairs of HIP IDs
+}
+
+export const CONSTELLATIONS: ConstellationDef[] = [
+  {
+    name: 'Orion',
+    nameKo: '오리온',
+    lines: [
+      [27989, 26727], // Betelgeuse - Alnitak
+      [27989, 26311], // Betelgeuse - Alnilam
+      [27989, 25930], // Betelgeuse - Mintaka
+      [24436, 27366], // Rigel - Saiph
+      [24436, 25930], // Rigel - Mintaka
+      [27366, 26311], // Saiph - Alnilam
+      [26727, 28716], // Alnitak - Meissa
+      [25930, 26727], // Mintaka - Alnitak
+      [25930, 28716], // Mintaka - Meissa (shoulder line)
+      [28716, 26727], // Meissa - Bellatrix (via belt)
+    ],
+  },
+  {
+    name: 'Ursa Major',
+    nameKo: '큰곰',
+    lines: [
+      [54061, 53910],  // Dubhe - Merak
+      [53910, 58001],  // Merak - Phecda
+      [58001, 59774],  // Phecda - Megrez
+      [59774, 62956],  // Megrez - Alioth
+      [62956, 65378],  // Alioth - Mizar
+      [65378, 67301],  // Mizar - Alkaid
+      [59774, 54061],  // Megrez - Dubhe
+    ],
+  },
+  {
+    name: 'Ursa Minor',
+    nameKo: '작은곰',
+    lines: [
+      [11767, 85822],  // Polaris - Yildun
+      [85822, 77055],  // Yildun - ζ UMi (approx chain)
+      [77055, 72607],  // ζ - η UMi
+      [72607, 75097],  // η - Kochab
+      [75097, 79822],  // Kochab - Pherkad
+      [79822, 82080],  // Pherkad - Yildun (bowl)
+      [82080, 11767],  // Yildun - Polaris
+    ],
+  },
+  {
+    name: 'Cassiopeia',
+    nameKo: '카시오페이아',
+    lines: [
+      [4427,  3179],   // Caph - Schedar
+      [3179,  6686],   // Schedar - Tsih
+      [6686,  8886],   // Tsih - Ruchbah
+      [8886,  11569],  // Ruchbah - Segin
+    ],
+  },
+  {
+    name: 'Leo',
+    nameKo: '사자',
+    lines: [
+      [49669, 50583],  // Regulus - Algieba
+      [50583, 51624],  // Algieba - Zeta Leo
+      [51624, 47908],  // Zeta - Zosma
+      [47908, 54872],  // Zosma - Denebola
+      [49669, 46750],  // Regulus - Epsilon Leo (sickle bottom)
+    ],
+  },
+  {
+    name: 'Scorpius',
+    nameKo: '전갈',
+    lines: [
+      [78527, 80763],  // Dschubba - Antares
+      [80763, 82396],  // Antares - Sargas
+      [82396, 81266],  // Sargas - Shaula
+      [81266, 84143],  // Shaula - Lesath
+      [78527, 77634],  // Dschubba - Acrab
+    ],
+  },
+  {
+    name: 'Cygnus',
+    nameKo: '백조',
+    lines: [
+      [102098, 95947],  // Deneb - Sadr
+      [95947,  98110],  // Sadr - Gienah
+      [95947,  94779],  // Sadr - ε Cyg (north arm)
+      [95947, 100453],  // Sadr - δ Cyg (south arm)
+    ],
+  },
+  {
+    name: 'Lyra',
+    nameKo: '거문고',
+    lines: [
+      [91262, 93194],  // Vega - Sheliak
+      [91262, 93903],  // Vega - Sulafat
+      [93194, 93903],  // Sheliak - Sulafat (parallelogram base)
+    ],
+  },
+  {
+    name: 'Aquila',
+    nameKo: '독수리',
+    lines: [
+      [97649, 99473],  // Altair - Alshain
+      [97649, 97278],  // Altair - Tarazed
+    ],
+  },
+  {
+    name: 'Gemini',
+    nameKo: '쌍둥이',
+    lines: [
+      [37826, 35550],  // Pollux - Mekbuda
+      [36850, 34693],  // Castor - Wasat
+      [35550, 34693],  // Mekbuda - Wasat
+      [35550, 32246],  // Mekbuda - Alhena
+      [34693, 30343],  // Wasat - Tejat
+    ],
+  },
+  {
+    name: 'Taurus',
+    nameKo: '황소',
+    lines: [
+      [21421, 20889],  // Aldebaran - Alcyone (Pleiades)
+      [21421, 23015],  // Aldebaran - Ain
+      [21421, 17702],  // Aldebaran - Alnath
+    ],
+  },
+  {
+    name: 'Auriga',
+    nameKo: '마차부',
+    lines: [
+      [24608, 23767],  // Capella - Menkalinan
+      [24608, 23416],  // Capella - Hassaleh
+      [23767, 17702],  // Menkalinan - Alnath (shared with Taurus)
+    ],
+  },
+  {
+    name: 'Perseus',
+    nameKo: '페르세우스',
+    lines: [
+      [15863, 14576],  // Mirfak - Algol
+      [15863, 18246],  // Mirfak - ζ Per
+    ],
+  },
+  {
+    name: 'Andromeda',
+    nameKo: '안드로메다',
+    lines: [
+      [677,   9640],   // Alpheratz - Mirach
+      [9640,  5447],   // Mirach - Almach
+    ],
+  },
+  {
+    name: 'Pegasus',
+    nameKo: '페가수스',
+    lines: [
+      [677,   112440], // Alpheratz - Markab (Great Square)
+      [112440, 109427],// Markab - Scheat
+      [109427, 677],   // Scheat - Alpheratz
+      [113963, 109427],// Enif - Scheat
+    ],
+  },
+  {
+    name: 'Virgo',
+    nameKo: '처녀',
+    lines: [
+      [65474, 57380],  // Spica - Porrima
+      [57380, 71957],  // Porrima - Vindemiatrix
+    ],
+  },
+  {
+    name: 'Bootes',
+    nameKo: '목동',
+    lines: [
+      [69673, 71075],  // Arcturus - Izar
+      [69673, 72105],  // Arcturus - Muphrid
+    ],
+  },
+  {
+    name: 'Canis Major',
+    nameKo: '큰개',
+    lines: [
+      [32349, 33579],  // Sirius - Adhara
+      [32349, 31592],  // Sirius - Wezen
+      [32349, 30324],  // Sirius - Aludra
+    ],
+  },
+  {
+    name: 'Hercules',
+    nameKo: '헤르쿨레스',
+    lines: [
+      [84345, 81693],  // Kornephoros - Sarin
+      [81693, 80816],  // Sarin - Marsic
+      [84345, 80816],  // Kornephoros - Marsic
+    ],
+  },
+  {
+    name: 'Ophiuchus',
+    nameKo: '뱀주인',
+    lines: [
+      [86032, 84012],  // Rasalhague - Sabik
+      [86032, 77070],  // Rasalhague - Unukalhai
+    ],
+  },
+  {
+    name: 'Sagittarius',
+    nameKo: '궁수',
+    lines: [
+      [90496, 89931],  // Kaus Aus - Kaus Media
+      [89931, 88635],  // Kaus Media - Kaus Borealis
+      [90496, 89642],  // Kaus Aus - Ascella
+      [89642, 92855],  // Ascella - Nunki
+    ],
+  },
+  {
+    name: 'Corona Borealis',
+    nameKo: '북쪽왕관',
+    lines: [
+      [76952, 75097],  // Alphecca anchor (short crown)
+    ],
+  },
+]

@@ -2,90 +2,105 @@
 
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { NAMED_STARS, CATALOG_STARS, CONSTELLATIONS, type StarEntry } from '@/lib/starCatalog'
+import { useStore } from '@/store/useStore'
 
-interface StarData {
-  positions: number[]
-  colors: number[]
-  sizes: number[]
+const DEG2RAD = Math.PI / 180
+const R = 500
+
+/**
+ * Calculate approximate Sun RA/Dec for a given Date.
+ * Uses a simplified VSOP87 approach (accuracy ~1 arcminute).
+ */
+function getSunRaDec(date: Date): { ra: number; dec: number } {
+  // Julian Day Number
+  const jd = date.getTime() / 86400000 + 2440587.5
+  const n = jd - 2451545.0  // days since J2000.0
+
+  // Mean longitude and anomaly (degrees)
+  const L = (280.460 + 0.9856474 * n) % 360
+  const g = ((357.528 + 0.9856003 * n) % 360) * DEG2RAD
+
+  // Ecliptic longitude (degrees)
+  const lambda = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG2RAD
+
+  // Obliquity of ecliptic (degrees)
+  const eps = (23.439 - 0.0000004 * n) * DEG2RAD
+
+  // RA and Dec (radians → degrees)
+  const ra = Math.atan2(Math.cos(eps) * Math.sin(lambda), Math.cos(lambda)) / DEG2RAD
+  const dec = Math.asin(Math.sin(eps) * Math.sin(lambda)) / DEG2RAD
+
+  return { ra: (ra + 360) % 360, dec }
 }
 
-function generateStars(count: number): StarData {
+function buildSunMesh(ra: number, dec: number): THREE.Object3D {
+  const pos = raDecTo3D(ra, dec)
+
+  // Glow sprite using canvas texture
+  const canvas = document.createElement('canvas')
+  canvas.width = 128
+  canvas.height = 128
+  const ctx = canvas.getContext('2d')!
+  const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64)
+  grad.addColorStop(0,   'rgba(255, 255, 200, 1.0)')
+  grad.addColorStop(0.15,'rgba(255, 230, 100, 0.9)')
+  grad.addColorStop(0.40,'rgba(255, 180,  50, 0.5)')
+  grad.addColorStop(0.70,'rgba(255, 120,   0, 0.2)')
+  grad.addColorStop(1.0, 'rgba(255, 80,    0, 0.0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, 128, 128)
+
+  const tex = new THREE.CanvasTexture(canvas)
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })
+  const sprite = new THREE.Sprite(mat)
+  sprite.position.copy(pos)
+  sprite.scale.set(30, 30, 1)
+
+  return sprite
+}
+
+function raDecTo3D(ra: number, dec: number): THREE.Vector3 {
+  const raRad = ra * DEG2RAD
+  const decRad = dec * DEG2RAD
+  return new THREE.Vector3(
+    R * Math.cos(decRad) * Math.sin(raRad),
+    R * Math.sin(decRad),
+    R * Math.cos(decRad) * Math.cos(raRad),
+  )
+}
+
+function bvToRgb(bv: number): [number, number, number] {
+  if (bv < -0.3) return [0.7, 0.8, 1.0]
+  if (bv < 0.0)  return [0.82 + bv * 0.4, 0.90, 1.0]
+  if (bv < 0.3)  return [1.0, 1.0, 1.0]
+  if (bv < 0.6)  return [1.0, 0.97, 0.82]
+  if (bv < 1.0)  return [1.0, 0.9, 0.6]
+  if (bv < 1.4)  return [1.0, 0.75, 0.4]
+  return [1.0, 0.5, 0.25]
+}
+
+function magToSize(mag: number): number {
+  return Math.max(0.3, Math.min(9.0, (8.0 - mag) * 0.85 + 0.5))
+}
+
+function buildStarMesh(stars: StarEntry[]): THREE.Points {
   const positions: number[] = []
   const colors: number[] = []
   const sizes: number[] = []
-  const R = 500
 
-  for (let i = 0; i < count; i++) {
-    const phi = Math.acos(2 * Math.random() - 1)
-    const theta = Math.random() * Math.PI * 2
-    positions.push(
-      R * Math.sin(phi) * Math.cos(theta),
-      R * Math.sin(phi) * Math.sin(theta),
-      R * Math.cos(phi),
-    )
-
-    const rnd = Math.random()
-    if (rnd < 0.55) {
-      // blue-white
-      colors.push(0.82 + Math.random() * 0.18, 0.85 + Math.random() * 0.15, 1.0)
-    } else if (rnd < 0.78) {
-      // white
-      colors.push(1, 1, 1)
-    } else if (rnd < 0.92) {
-      // yellow
-      colors.push(1, 0.92 + Math.random() * 0.08, 0.6 + Math.random() * 0.3)
-    } else {
-      // orange-red
-      colors.push(1, 0.45 + Math.random() * 0.35, 0.2 + Math.random() * 0.2)
-    }
-
-    // Magnitude distribution: most stars are dim
-    const mag = Math.pow(Math.random(), 1.8)
-    sizes.push(Math.max(0.5, (1 - mag) * 4.5))
+  for (const s of stars) {
+    const v = raDecTo3D(s.ra, s.dec)
+    positions.push(v.x, v.y, v.z)
+    const [r, g, b] = bvToRgb(s.bv ?? 0.0)
+    colors.push(r, g, b)
+    sizes.push(magToSize(s.mag))
   }
 
-  return { positions, colors, sizes }
-}
-
-function generateMilkyWay(count: number): StarData {
-  const positions: number[] = []
-  const colors: number[] = []
-  const sizes: number[] = []
-  const R = 498 // slightly smaller radius to avoid z-fighting
-
-  for (let i = 0; i < count; i++) {
-    const glon = Math.random() * Math.PI * 2
-    // Gaussian spread around galactic plane ±10°
-    const glat =
-      ((Math.random() + Math.random() + Math.random() - 1.5) / 1.5) * (12 * Math.PI) / 180
-
-    // Approximate galactic-to-equatorial rotation (tilt ~63°)
-    const tilt = 63.0 * (Math.PI / 180)
-    const cosG = Math.cos(glat)
-    const sinG = Math.sin(glat)
-    const cosL = Math.cos(glon)
-    const sinL = Math.sin(glon)
-
-    const px = cosG * cosL
-    const py = cosG * sinL * Math.cos(tilt) - sinG * Math.sin(tilt)
-    const pz = cosG * sinL * Math.sin(tilt) + sinG * Math.cos(tilt)
-    const norm = Math.sqrt(px * px + py * py + pz * pz)
-
-    positions.push((R * px) / norm, (R * py) / norm, (R * pz) / norm)
-
-    const b = 0.45 + Math.random() * 0.4
-    colors.push(b, b, Math.min(1, b + 0.05))
-    sizes.push(0.3 + Math.random() * 0.7)
-  }
-
-  return { positions, colors, sizes }
-}
-
-function buildPointMesh(data: StarData): THREE.Points {
   const geo = new THREE.BufferGeometry()
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(data.positions, 3))
-  geo.setAttribute('starColor', new THREE.Float32BufferAttribute(data.colors, 3))
-  geo.setAttribute('starSize', new THREE.Float32BufferAttribute(data.sizes, 1))
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geo.setAttribute('starColor', new THREE.Float32BufferAttribute(colors, 3))
+  geo.setAttribute('starSize', new THREE.Float32BufferAttribute(sizes, 1))
 
   const mat = new THREE.ShaderMaterial({
     transparent: true,
@@ -97,7 +112,7 @@ function buildPointMesh(data: StarData): THREE.Points {
       void main() {
         vColor = starColor;
         vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = starSize * (320.0 / length(mvPos.xyz));
+        gl_PointSize = starSize * (300.0 / length(mvPos.xyz));
         gl_Position = projectionMatrix * mvPos;
       }
     `,
@@ -106,9 +121,9 @@ function buildPointMesh(data: StarData): THREE.Points {
       void main() {
         float d = distance(gl_PointCoord, vec2(0.5));
         if (d > 0.5) discard;
-        float alpha = 1.0 - smoothstep(0.25, 0.5, d);
-        float glow = exp(-d * 7.0) * 0.5;
-        gl_FragColor = vec4(vColor + glow, alpha * (0.15 + glow + (1.0 - d * 2.0) * 0.85));
+        float alpha = 1.0 - smoothstep(0.2, 0.5, d);
+        float glow = exp(-d * 6.0) * 0.6;
+        gl_FragColor = vec4(vColor + glow, alpha * (0.2 + glow + (1.0 - d * 2.0) * 0.8));
       }
     `,
   })
@@ -116,14 +131,105 @@ function buildPointMesh(data: StarData): THREE.Points {
   return new THREE.Points(geo, mat)
 }
 
+function buildMilkyWay(count: number): THREE.Points {
+  const positions: number[] = []
+  const colors: number[] = []
+  const sizes: number[] = []
+
+  for (let i = 0; i < count; i++) {
+    const glon = Math.random() * Math.PI * 2
+    const glat = ((Math.random() + Math.random() + Math.random() - 1.5) / 1.5) * (12 * DEG2RAD)
+    const tilt = 63.0 * DEG2RAD
+    const cosG = Math.cos(glat)
+    const sinG = Math.sin(glat)
+    const cosL = Math.cos(glon)
+    const sinL = Math.sin(glon)
+    const px = cosG * cosL
+    const py = cosG * sinL * Math.cos(tilt) - sinG * Math.sin(tilt)
+    const pz = cosG * sinL * Math.sin(tilt) + sinG * Math.cos(tilt)
+    const norm = Math.sqrt(px * px + py * py + pz * pz)
+    const rr = 498
+    positions.push((rr * px) / norm, (rr * py) / norm, (rr * pz) / norm)
+    const b = 0.35 + Math.random() * 0.35
+    colors.push(b, b, Math.min(1, b + 0.06))
+    sizes.push(0.2 + Math.random() * 0.6)
+  }
+
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geo.setAttribute('starColor', new THREE.Float32BufferAttribute(colors, 3))
+  geo.setAttribute('starSize', new THREE.Float32BufferAttribute(sizes, 1))
+
+  const mat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    vertexShader: `
+      attribute vec3 starColor;
+      attribute float starSize;
+      varying vec3 vColor;
+      void main() {
+        vColor = starColor;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = starSize * (240.0 / length(mvPos.xyz));
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        float d = distance(gl_PointCoord, vec2(0.5));
+        if (d > 0.5) discard;
+        float alpha = (1.0 - smoothstep(0.2, 0.5, d)) * 0.45;
+        gl_FragColor = vec4(vColor, alpha);
+      }
+    `,
+  })
+
+  return new THREE.Points(geo, mat)
+}
+
+function buildConstellationLines(): THREE.LineSegments | null {
+  const hipMap = new Map<number, THREE.Vector3>()
+  for (const s of NAMED_STARS) {
+    if (s.hip !== undefined) {
+      hipMap.set(s.hip, raDecTo3D(s.ra, s.dec))
+    }
+  }
+
+  const positions: number[] = []
+
+  for (const c of CONSTELLATIONS) {
+    for (const [hipA, hipB] of c.lines) {
+      const a = hipMap.get(hipA)
+      const b = hipMap.get(hipB)
+      if (!a || !b) continue
+      const scale = 0.997
+      positions.push(a.x * scale, a.y * scale, a.z * scale)
+      positions.push(b.x * scale, b.y * scale, b.z * scale)
+    }
+  }
+
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+
+  const mat = new THREE.LineBasicMaterial({
+    color: 0x4488cc,
+    transparent: true,
+    opacity: 0.35,
+    depthWrite: false,
+  })
+
+  return new THREE.LineSegments(geo, mat)
+}
+
 export default function StarCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const showLines = useStore((s) => s.showConstellationLines)
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    // ── Scene ──────────────────────────────────────────────────
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0x020817)
 
@@ -140,11 +246,30 @@ export default function StarCanvas() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     container.appendChild(renderer.domElement)
 
-    // ── Stars ───────────────────────────────────────────────────
-    scene.add(buildPointMesh(generateStars(5000)))
-    scene.add(buildPointMesh(generateMilkyWay(7000)))
+    // Real star catalog
+    const allStars = [...NAMED_STARS, ...CATALOG_STARS]
+    scene.add(buildStarMesh(allStars))
+    scene.add(buildMilkyWay(6000))
 
-    // ── Atmosphere haze near horizon ────────────────────────────
+    // Sun position based on current date
+    const sunPos = getSunRaDec(new Date())
+    scene.add(buildSunMesh(sunPos.ra, sunPos.dec))
+
+    // Constellation lines mesh (toggled externally via showLines)
+    const linesMesh = buildConstellationLines()
+    if (linesMesh) {
+      linesMesh.visible = useStore.getState().showConstellationLines
+      scene.add(linesMesh)
+    }
+
+    const unsubscribe = useStore.subscribe(
+      (state) => state.showConstellationLines,
+      (visible) => {
+        if (linesMesh) linesMesh.visible = visible
+      },
+    )
+
+    // Horizon haze
     const hazeGeo = new THREE.CylinderGeometry(490, 490, 80, 64, 1, true)
     const hazeMat = new THREE.MeshBasicMaterial({
       color: 0x0a1e3d,
@@ -157,11 +282,11 @@ export default function StarCanvas() {
     haze.position.y = -40
     scene.add(haze)
 
-    // ── Interaction ─────────────────────────────────────────────
+    // Interaction
     let pointerDown = false
     let lastX = 0
     let lastY = 0
-    let rotX = 0.3 // slight upward tilt (looking toward zenith)
+    let rotX = 0.3
     let rotY = 0
     let targetRotX = 0.3
     let targetRotY = 0
@@ -196,7 +321,6 @@ export default function StarCanvas() {
     }
     window.addEventListener('resize', onResize)
 
-    // ── Animation ───────────────────────────────────────────────
     let autoRot = 0
     let rafId: number
 
@@ -212,6 +336,7 @@ export default function StarCanvas() {
 
     return () => {
       cancelAnimationFrame(rafId)
+      unsubscribe()
       window.removeEventListener('pointerdown', onPointerDown)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
@@ -222,6 +347,11 @@ export default function StarCanvas() {
       }
     }
   }, [])
+
+  // Keep lines visibility in sync without full remount
+  useEffect(() => {
+    // handled via zustand subscribe inside the main effect
+  }, [showLines])
 
   return (
     <div

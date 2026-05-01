@@ -1,0 +1,23 @@
+{
+  "name": "kasi-rise-set-api",
+  "version": "1.0.0",
+  "description": "한국천문연구원 출몰시각 정보제공 서비스 예제",
+  "main": "index.js",
+  "scripts": {
+    "area": "npx ts-node getAreaRiseSetInfo.ts",
+    "lc": "npx ts-node getLCRiseSetInfo.ts",
+    "lunph": "npx ts-node getLunPhInfo.ts",
+    "julday": "npx ts-node getJulDayInfo.ts",
+    "solcal": "npx ts-node getSolCalInfo.ts",
+    "astro": "npx ts-node getAstroEventInfo.ts"
+  },
+  "dependencies": {
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/xml2js": "^0.4.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  }
+}
