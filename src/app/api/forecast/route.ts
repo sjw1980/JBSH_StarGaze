@@ -41,7 +41,7 @@ export async function GET() {
         if (item.fcstDate > todayStr) return true
         return item.fcstDate === todayStr && item.fcstTime >= nowHHMM
       })
-      .slice(0, 48)
+      .slice(0, 24)
       .map(item => {
         const year = parseInt(item.fcstDate.slice(0, 4), 10)
         const mon  = parseInt(item.fcstDate.slice(4, 6), 10) - 1

@@ -14,13 +14,8 @@ import {
 import { useStore } from '@/store/useStore'
 
 function formatHour(unix: number) {
-  return (
-    new Date(unix * 1000).toLocaleString('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      hour: '2-digit',
-      hour12: false,
-    }) + '시'
-  )
+  const kst = new Date(unix * 1000 + 9 * 60 * 60 * 1000)
+  return String(kst.getUTCHours()).padStart(2, '0') + '시'
 }
 
 export default function WeatherTimeline() {
@@ -34,9 +29,16 @@ export default function WeatherTimeline() {
   const chartData = forecastData.map((f) => ({
     time: formatHour(f.dt),
     '기온(°C)': Math.round(f.temp * 10) / 10,
-    '운량(%)': f.clouds,
     '강수확률(%)': Math.round(f.pop * 100),
   }))
+
+  function skyIcon(clouds: number, description: string): string {
+    if (description.includes('소나기') || description.includes('비')) return '🌧️'
+    if (description.includes('눈')) return '❄️'
+    if (clouds >= 90) return '☁️'
+    if (clouds >= 65) return '⛅'
+    return '☀️'
+  }
 
   return (
     <div
@@ -110,6 +112,7 @@ export default function WeatherTimeline() {
             </div>
 
             {forecastData.length > 0 ? (
+              <>
               <div
                 onClick={(e) => e.stopPropagation()}
                 style={{ width: '100%', height: 180 }}
@@ -123,10 +126,6 @@ export default function WeatherTimeline() {
                       <linearGradient id="gTemp" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.4} />
                         <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="gCloud" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="gRain" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#818cf8" stopOpacity={0.4} />
@@ -161,14 +160,6 @@ export default function WeatherTimeline() {
                     />
                     <Area
                       type="monotone"
-                      dataKey="운량(%)"
-                      stroke="#94a3b8"
-                      strokeWidth={1.5}
-                      fill="url(#gCloud)"
-                      dot={false}
-                    />
-                    <Area
-                      type="monotone"
                       dataKey="강수확률(%)"
                       stroke="#818cf8"
                       strokeWidth={1.5}
@@ -178,6 +169,23 @@ export default function WeatherTimeline() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
+
+              {/* 하늘상태 아이콘 스트립 (3시간 간격) */}
+              <div
+                className="flex justify-between mt-3 px-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {forecastData
+                  .filter((_, i) => i % 3 === 0)
+                  .slice(0, 8)
+                  .map((f) => (
+                    <div key={f.dt} className="flex flex-col items-center gap-0.5 min-w-0">
+                      <span className="text-base leading-none">{skyIcon(f.clouds, f.description)}</span>
+                      <span className="text-[10px] text-slate-500">{formatHour(f.dt)}</span>
+                    </div>
+                  ))}
+              </div>
+              </>
             ) : (
               <div className="text-center py-5 text-slate-500">
                 <div className="text-2xl mb-2">🔑</div>
