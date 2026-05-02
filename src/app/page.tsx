@@ -8,6 +8,7 @@ import ObservationPanel from '@/components/ObservationPanel'
 import WeatherTimeline from '@/components/WeatherTimeline'
 import ResourceGateway from '@/components/ResourceGateway'
 import ClockDisplay from '@/components/ClockDisplay'
+import AstroEventPanel from '@/components/AstroEventPanel'
 
 // Three.js canvas must be client-only (no SSR)
 const StarCanvas = dynamic(() => import('@/components/StarCanvas'), { ssr: false })
@@ -111,10 +112,11 @@ export default function Home() {
         <div className="flex-1" />
 
         {/* ── Bottom panels ───────────────────────────── */}
-        <div className="flex items-end gap-3 px-6 pb-6">
-          <ObservationPanel />
-          <WeatherTimeline />
-          <ResourceGateway />
+        <div className="flex items-end gap-3 px-6 pb-6 overflow-x-auto pb-safe shrink-0">
+          <div className="shrink-0"><AstroEventPanel /></div>
+          <div className="shrink-0"><ObservationPanel /></div>
+          <div className="shrink-0"><WeatherTimeline /></div>
+          <div className="shrink-0"><ResourceGateway /></div>
         </div>
       </div>
     </main>

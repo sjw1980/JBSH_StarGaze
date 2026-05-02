@@ -28,4 +28,4 @@ export interface ForecastItem {
 }
 
 export type ObservationStatus = '최적' | '보통' | '불가'
-export type PanelType = 'observation' | 'weather' | 'resource' | null
+export type PanelType = 'observation' | 'weather' | 'resource' | 'astro' | null

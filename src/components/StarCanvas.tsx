@@ -262,28 +262,37 @@ export default function StarCanvas() {
     let targetRotX = 0.3
     let targetRotY = 0
 
+    // touch-action:none은 브라우저가 터치 스크롤을 가로채지 않도록 함
+    renderer.domElement.style.touchAction = 'none'
+    renderer.domElement.style.cursor = 'grab'
+
     const onPointerDown = (e: PointerEvent) => {
+      e.preventDefault()
       pointerDown = true
       lastX = e.clientX
       lastY = e.clientY
+      renderer.domElement.setPointerCapture(e.pointerId)
       renderer.domElement.style.cursor = 'grabbing'
     }
     const onPointerMove = (e: PointerEvent) => {
       if (!pointerDown) return
+      e.preventDefault()
       targetRotY += (e.clientX - lastX) * 0.0018
       targetRotX += (e.clientY - lastY) * 0.0018
       targetRotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, targetRotX))
       lastX = e.clientX
       lastY = e.clientY
     }
-    const onPointerUp = () => {
+    const onPointerUp = (e: PointerEvent) => {
       pointerDown = false
+      renderer.domElement.releasePointerCapture(e.pointerId)
       renderer.domElement.style.cursor = 'grab'
     }
 
-    window.addEventListener('pointerdown', onPointerDown)
-    window.addEventListener('pointermove', onPointerMove)
-    window.addEventListener('pointerup', onPointerUp)
+    renderer.domElement.addEventListener('pointerdown', onPointerDown)
+    renderer.domElement.addEventListener('pointermove', onPointerMove)
+    renderer.domElement.addEventListener('pointerup', onPointerUp)
+    renderer.domElement.addEventListener('pointercancel', onPointerUp)
 
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight
@@ -307,9 +316,10 @@ export default function StarCanvas() {
 
     return () => {
       cancelAnimationFrame(rafId)
-      window.removeEventListener('pointerdown', onPointerDown)
-      window.removeEventListener('pointermove', onPointerMove)
-      window.removeEventListener('pointerup', onPointerUp)
+      renderer.domElement.removeEventListener('pointerdown', onPointerDown)
+      renderer.domElement.removeEventListener('pointermove', onPointerMove)
+      renderer.domElement.removeEventListener('pointerup', onPointerUp)
+      renderer.domElement.removeEventListener('pointercancel', onPointerUp)
       window.removeEventListener('resize', onResize)
       renderer.dispose()
       if (container.contains(renderer.domElement)) {
@@ -322,7 +332,7 @@ export default function StarCanvas() {
     <div
       ref={containerRef}
       className="fixed inset-0 z-0"
-      style={{ cursor: 'grab' }}
+      style={{ cursor: 'grab', touchAction: 'none' }}
     />
   )
 }
